@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Ceilometer Cloud Viewer</title>
+<title>Airport Ceilometer Cloud Viewer</title>
 
 <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
 
@@ -55,10 +55,10 @@ color:red;
 
 <div id="controls">
 
-<label>ICAO:</label>
+<label>Airport ICAO Code:</label>
 <input id="icaoInput" value="KSAN">
 
-<label>Hours:</label>
+<label>Hours of Data to Display (168 max):</label>
 <input id="hoursInput" value="24" type="number">
 
 <button onclick="loadStation()">Load</button>
@@ -77,11 +77,11 @@ color:red;
 <b>Data Disclaimer</b>
 
 <p>
-Hourly cloud data (larger bubbles) is based on hourly airport METAR readings which averages the past 30 minutes of data with double weighting for the last 10 minutes of passing sky condition observations.
+Hourly cloud data (larger circles) is based on hourly airport METAR readings. These observations average the past 30 minutes of ceilometer data with double weighting for the last 10 minutes of passing sky condition observations.
 </p>
 
 <p>
-High rate cloud data (smaller bubbles) is quasi-instantaneous with very little averaging. The resulting data is more prone to overall cloud status mischaracterizations in patchy cloud conditions since the observation is the result of a point measurement.
+High rate cloud data (smaller circles) is only averaged over five minutes. The resulting ceilometer observations are more prone to overall cloud status mischaracterization in patchy cloud conditions since the observation is the result of a point measurement with little averaging.
 </p>
 
 </div>
