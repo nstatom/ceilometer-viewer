@@ -83,7 +83,7 @@ Hourly cloud data (larger circles) is based on hourly airport METAR readings. Th
 </p>
 
 <p>
-High rate cloud data (smaller circles) is only averaged over five minutes. The resulting ceilometer observations are more prone to overall cloud status mischaracterization in patchy cloud conditions since the observation is the result of a point measurement with little averaging.
+High rate cloud data (smaller circles) is only averaged over five minutes. The resulting ceilometer observations are more prone to overall cloud status mischaracterization in patchy cloud conditions than the metar data since the observation is the result of a point measurement with less averaging.
 </p>
 
 </div>
@@ -102,6 +102,48 @@ let stations = []
 // -------------------------
 // VALIDATE INPUTS
 // -------------------------
+
+async function getAllMETARs(){
+
+const url =
+"https://aviationweather.gov/api/data/metar?format=json&hours=1";
+
+try{
+
+const response = await fetch(url);
+
+if(!response.ok){
+throw new Error("METAR download failed");
+}
+
+const data = await response.json();
+
+console.log("Stations returned:", data.length);
+
+return data;
+
+}
+catch(error){
+
+console.error("METAR fetch error:", error);
+
+document.getElementById("messages").innerHTML =
+"<span class='error'>Unable to download METAR data.</span>";
+
+}
+
+}
+
+function flightCategoryColor(cat){
+
+if(cat === "VFR") return "green";
+if(cat === "MVFR") return "blue";
+if(cat === "IFR") return "red";
+if(cat === "LIFR") return "purple";
+
+return "gray";
+
+}
 
 function validateInputs(){
 
@@ -137,9 +179,9 @@ return
 }
 
 document.getElementById("metadata").innerHTML =
-`Elevation: ${station.elev} ft |
-Lat: ${station.lat} |
-Lon: ${station.lon}`
+Elevation: ${station.elev} ft |
+Latitude: ${station.lat} |
+Longitude: ${station.lon}`
 
 updateMapSelection(station)
 
@@ -151,48 +193,80 @@ loadCloudPlot(station, hours)
 // PLOTLY MAP
 // -------------------------
 
-function initMap(){
+async function initMap(){
 
-let lats = stations.map(s => s.lat)
-let lons = stations.map(s => s.lon)
+const metars = await getAllMETARs();
 
-let colors = stations.map(s => s.flight)
+let lats = [];
+let lons = [];
+let colors = [];
+let texts = [];
+let ids = [];
+
+metars.forEach(m => {
+
+if(!m.lat || !m.lon) return;
+
+lats.push(m.lat);
+lons.push(m.lon);
+
+ids.push(m.icaoId);
+
+texts.push(
+m.icaoId + "<br>" +
+(m.flight_category || "") + "<br>" +
+m.rawOb
+);
+
+colors.push(
+flightCategoryColor(m.flight_category)
+);
+
+});
 
 let trace = {
+
 type:"scattergeo",
 mode:"markers",
+
 lat:lats,
 lon:lons,
-text:stations.map(s=>s.icao),
+
+text:texts,
+
 marker:{
-size:8,
+size:7,
 color:colors
 }
-}
 
-let layout={
-margin: {l:0, r:0, t:0, b:0},
+};
+
+let layout = {
+
+margin:{l:0,r:0,t:0,b:0},
+
 geo:{
 scope:"usa",
-projection:{type:"albers usa"}
-}
+projection:{type:"albers usa"},
+domain:{x:[0,1],y:[0,1]}
 }
 
-Plotly.newPlot("map",[trace],layout)
+};
+
+Plotly.newPlot("map",[trace],layout,{displaylogo:false});
 
 document.getElementById("map")
 .on('plotly_click',function(data){
 
-let icao = data.points[0].text
+let icao = data.points[0].text.split("<br>")[0];
 
-document.getElementById("icaoInput").value = icao
+document.getElementById("icaoInput").value = icao;
 
-loadStation()
+loadStation();
 
-})
+});
 
 }
-
 // -------------------------
 // UPDATE MAP SELECTION
 // -------------------------
@@ -260,21 +334,11 @@ Plotly.newPlot("plot",[trace],layout)
 // INITIALIZE
 // -------------------------
 
-function init(){
+async function init(){
 
-// example stations
+await initMap();
 
-stations = [
-
-{icao:"KSAN",lat:32.733,elev:13,lon:-117.183,flight:"green"},
-{icao:"KLAX",lat:33.94,elev:125,lon:-118.408,flight:"blue"},
-{icao:"KDEN",lat:39.861,elev:5430,lon:-104.673,flight:"red"}
-
-]
-
-initMap()
-
-loadStation()
+loadStation();
 
 }
 
