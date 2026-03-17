@@ -2,32 +2,15 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>METAR API Test</title>
+<title>METAR Debug Viewer</title>
 
 <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
 
 <style>
-body{
-font-family:Arial;
-margin:20px;
-}
-
-#plot{
-height:450px;
-border:2px solid #444;
-margin-top:10px;
-}
-
-pre{
-background:#eee;
-padding:10px;
-overflow:auto;
-height:200px;
-}
-
-.error{
-color:red;
-}
+body{font-family:Arial;margin:20px;}
+#plot{height:450px;border:2px solid #444;margin-top:10px;}
+pre{background:#eee;padding:10px;height:200px;overflow:auto;}
+.error{color:red;}
 </style>
 </head>
 
@@ -36,55 +19,55 @@ color:red;
 <h2>METAR API Debug Tool</h2>
 
 <label>ICAO:</label>
-<input id="icaoInput" value="KSAN">
+<input id="icao" value="KSAN">
 
 <label>Hours:</label>
-<input id="hoursInput" value="24" type="number">
+<input id="hours" value="24">
 
-<button onclick="runTest()">Run Test</button>
+<button onclick="run()">Run Test</button>
 
 <div id="status"></div>
 
-<h3>Raw API Response</h3>
+<h3>Raw Response</h3>
 <pre id="raw"></pre>
 
 <div id="plot"></div>
 
 <script>
 
-async function runTest(){
+async function run(){
 
-const icao =
-document.getElementById("icaoInput").value.toUpperCase();
+let icao=document.getElementById("icao").value.toUpperCase();
+let hours=document.getElementById("hours").value;
 
-const hours =
-document.getElementById("hoursInput").value;
-
-const url =
+const api =
 `https://aviationweather.gov/api/data/metar?ids=${icao}&format=json&hours=${hours}`;
 
+/* CORS proxy for debugging */
+const url =
+`https://api.allorigins.win/raw?url=${encodeURIComponent(api)}`;
+
 document.getElementById("status").innerHTML =
-"Downloading: " + url;
+"Request:<br>"+url;
 
 try{
 
-const response = await fetch(url);
+const r=await fetch(url);
 
 document.getElementById("status").innerHTML +=
-"<br>Status: " + response.status;
+"<br>Status: "+r.status;
 
-const data = await response.json();
+const data=await r.json();
 
 document.getElementById("raw").textContent =
 JSON.stringify(data,null,2);
 
-plotTest(data);
+plot(data);
 
-}
-catch(err){
+}catch(err){
 
 document.getElementById("status").innerHTML =
-"<span class='error'>Fetch failed</span>";
+"<span class='error'>Download failed</span>";
 
 console.error(err);
 
@@ -92,45 +75,36 @@ console.error(err);
 
 }
 
-function plotTest(data){
+function plot(data){
 
-let times=[];
-let heights=[];
+let x=[];
+let y=[];
 
-data.forEach(m => {
+data.forEach(m=>{
 
 if(!m.clouds) return;
 
-m.clouds.forEach(layer => {
+m.clouds.forEach(c=>{
 
-times.push(new Date(m.obsTime));
-heights.push(layer.base);
-
-});
+x.push(new Date(m.obsTime));
+y.push(c.base);
 
 });
 
-let trace = {
+});
 
-x:times,
-y:heights,
-
-mode:"markers",
-
-marker:{
-size:12
-}
-
-};
-
-Plotly.newPlot("plot",[trace],{
+Plotly.newPlot("plot",[{
+x:x,
+y:y,
+mode:"markers"
+}],{
 xaxis:{title:"Time"},
-yaxis:{title:"Cloud Base (ft)"}
+yaxis:{title:"Cloud Base ft"}
 });
 
 }
 
-runTest();
+run();
 
 </script>
 
