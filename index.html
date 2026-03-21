@@ -17,10 +17,10 @@ pre{background:#eee;padding:10px;height:200px;overflow:auto;}
 
 <body>
 
-<h2 style="display:flex; align-items:center; gap:10px;">
-  <img src="CloudbaseLogo.png" style="height:30px;">
+<h1 style="display:flex; align-items:center; gap:7px;">
+  <img src="CloudbaseLogo.png" style="height:40px;">
   Cloudbase v1.07
-</h2>
+</h1>
 
 <label>Airport ICAO Code:</label>
 <input id="icao" value="KSAN">
@@ -177,6 +177,8 @@ Plotly.newPlot("plot", plotTraces, {
 
   margin:{l:50,r:20,t:20,b:40},
 
+  title: `${station.icao} Cloud Evolution`,
+  
   xaxis:{
     title:"Time [UTC]"
   },
