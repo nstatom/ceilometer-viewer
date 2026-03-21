@@ -17,9 +17,9 @@ pre{background:#eee;padding:10px;height:200px;overflow:auto;}
 
 <body>
 
-<h1 style="display:flex; align-items:center; gap:7px;">
-  <img src="CloudbaseLogo.png" style="height:40px;">
-  Cloudbase v1.07
+<h1 style="display:flex; align-items:center; gap:5px;">
+  <img src="CloudbaseLogo.png" style="height:50px;">
+  Cloudbase v1.08
 </h1>
 
 <label>Airport ICAO Code:</label>
@@ -31,11 +31,11 @@ pre{background:#eee;padding:10px;height:200px;overflow:auto;}
 <button onclick="run()">Run Update</button>
 
 <br>
-<h3>${icao} METAR Low Cloud Evolution (<3000ft)</h3>
+<h3>${station.icao} METAR Low Cloud Evolution (<3000ft)</h3>
 <div id="plot3k"></div>
 
 <br>
-<h3>${icao} METAR Full Cloud Evolution</h3>
+<h3>${station.icao} METAR Full Cloud Evolution</h3>
 <div id="plot"></div>
 
 <br>
@@ -177,7 +177,7 @@ Plotly.newPlot("plot", plotTraces, {
 
   margin:{l:50,r:20,t:20,b:40},
 
-  title: `${station.icao} Cloud Evolution`,
+  title: `${station.icao} Cloud Evolution2`,
   
   xaxis:{
     title:"Time [UTC]"
@@ -257,6 +257,8 @@ plotTraces = plotTraces.filter(tr => tr.x.length > 0);
 Plotly.newPlot("plot", plotTraces, {
 
   margin:{l:50,r:20,t:20,b:40},
+
+  title: `${station.icao} Cloud Evolution2`,
 
   xaxis:{
     title:"Time [UTC]"
