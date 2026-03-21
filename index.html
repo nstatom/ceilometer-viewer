@@ -42,11 +42,11 @@ pre{background:#eee;padding:10px;height:200px;overflow:auto;}
 <b>Data Disclaimer</b>
 
 <p>
-Hourly cloud data (larger circles) is based on hourly airport METAR readings from the NOAA Aviation Weather API. These observations average the past 30 minutes of ceilometer data with double weighting for the last 10 minutes of passing sky condition observations.
+Hourly cloud data (larger circles) is based on airport METAR readings from the NOAA Aviation Weather API. These observations average the past 30 minutes of ceilometer data with double weighting for the last 10 minutes of passing sky condition observations.
 </p>
 
 <p>
-High rate cloud data (smaller circles) is only averaged over five minutes from Iowa State Mesonet API. The resulting ceilometer observations are more prone to overall cloud status mischaracterization in patchy cloud conditions than the METAR data since each observation is the result of a point measurement with less averaging.
+High rate cloud data (smaller circles) is from the Iowa State Mesonet API. The resulting ceilometer five minute observations are more prone to overall cloud status mischaracterization in patchy cloud conditions than the METAR data since each observation is the result of a 5 minute collection of point measurements with less averaging.
 </p>
 
 <script>
@@ -88,6 +88,9 @@ document.getElementById("raw").textContent =
 JSON.stringify(json, null, 2);
 
 // Worker returns { data: [...] }
+plot3k(json.data);
+
+// Worker returns { data: [...] }
 plot(json.data);
 
 }catch(err){
@@ -101,13 +104,13 @@ console.error(err);
 
 }
 
-// ---------------- PLOT ----------------
+// ---------------- PLOT Full Range ----------------
 
 function plot(data){
 
 let traces = {
   SKC: {x:[], y:[], mode:"markers", name:"SKC/NSC",
-        marker:{color:"yellow", size:15, symbol:"triangle-up"}},
+        marker:{color:"yellow", size:20, symbol:"triangle-up"}},
 
   FEW: {x:[], y:[], mode:"markers", name:"FEW",
         marker:{color:"green", size:15, symbol:"circle"}},
@@ -122,7 +125,7 @@ let traces = {
         marker:{color:"black", size:15, symbol:"circle"}}
 };
 
-let maxHeight = -500;
+let maxHeight = -1000;
 
 data.forEach(m => {
 
@@ -143,7 +146,7 @@ data.forEach(m => {
     let base = c.base;
     let cover = c.cover;
 
-    if(base > maxHeight) maxHeight = base + 500;
+    if(base > maxHeight) maxHeight = base + 1000;
 
     if(traces[cover]){
       traces[cover].x.push(t*1000);
@@ -173,7 +176,86 @@ Plotly.newPlot("plot", plotTraces, {
 
   yaxis:{
     title:"Cloud Base AGL [ft]",
-    range:[-500, yMax]
+    range:[-1000, yMax]
+  }
+
+}, {displaylogo:false});
+
+}
+
+// ---------------- PLOT Full Range ----------------
+
+function plot3k(data){
+
+let traces = {
+  SKC: {x:[], y:[], mode:"markers", name:"SKC/NSC",
+        marker:{color:"yellow", size:20, symbol:"triangle-up"}},
+
+  FEW: {x:[], y:[], mode:"markers", name:"FEW",
+        marker:{color:"green", size:15, symbol:"circle"}},
+
+  SCT: {x:[], y:[], mode:"markers", name:"SCT",
+        marker:{color:"blue", size:15, symbol:"circle"}},
+
+  BKN: {x:[], y:[], mode:"markers", name:"BKN",
+        marker:{color:"red", size:15, symbol:"circle"}},
+
+  OVC: {x:[], y:[], mode:"markers", name:"OVC",
+        marker:{color:"black", size:15, symbol:"circle"}}
+};
+
+let maxHeight = -1000;
+
+data.forEach(m => {
+
+  let t = new Date(m.time);
+
+  // --- SKC / NSC (no clouds) ---
+  if(!m.clouds || m.clouds.length === 0){
+    traces.SKC.x.push(t*1000);
+    traces.SKC.y.push(0);
+    return;
+  }
+
+  // --- Cloud layers ---
+  m.clouds.forEach(c => {
+
+    if(!c.base) return;
+
+    let base = c.base;
+    let cover = c.cover;
+
+    if(base > maxHeight) maxHeight = base + 1000;
+
+    if(traces[cover]){
+      traces[cover].x.push(t*1000);
+      traces[cover].y.push(base);
+    }
+
+  });
+
+});
+
+// enforce minimum 3000 ft
+let yMax = Math.max(maxHeight, 3000);
+
+// convert traces object → array
+let plotTraces = Object.values(traces);
+
+// remove empty traces (clean legend)
+plotTraces = plotTraces.filter(tr => tr.x.length > 0);
+
+Plotly.newPlot("plot", plotTraces, {
+
+  margin:{l:50,r:20,t:20,b:40},
+
+  xaxis:{
+    title:"Time [UTC]"
+  },
+
+  yaxis:{
+    title:"Cloud Base AGL [ft]",
+    range:[-1000, 3000]
   }
 
 }, {displaylogo:false});
