@@ -8,7 +8,7 @@
 
 <style>
 body{font-family:Arial;margin:20px;}
-#plot{height:450px;border:2px solid #444;margin-top:10px;}
+#plot, #plot3k{height:450px;border:2px solid #444;margin-top:10px;}
 pre{background:#eee;padding:10px;height:200px;overflow:auto;}
 .error{color:red;}
 .warning{color:orange;}
@@ -19,7 +19,7 @@ pre{background:#eee;padding:10px;height:200px;overflow:auto;}
 
 <h1 style="display:flex; align-items:center; gap:7px;">
   <img src="CloudbaseLogo.png" style="height:40px;">
-  Cloudbase v1.07
+  Cloudbase v1.08
 </h1>
 
 <label>Airport ICAO Code:</label>
@@ -69,10 +69,10 @@ let icao = document.getElementById("icao").value.toUpperCase();
 let hours = parseInt(document.getElementById("hours").value);
 
 document.getElementById("title3k").innerText =
-  `${icao} METAR Low Cloud Evolution (<3000 ft)`;
+  `${icao} METAR ${hours} Hour Low Cloud Evolution (<3000 ft)`;
 
 document.getElementById("titleFull").innerText =
-  `${icao} METAR Full Cloud Evolution`;
+  `${icao} METAR ${hours} Hour Full Cloud Evolution`;
 
 // enforce max
 if(hours > 168){
@@ -150,7 +150,9 @@ let maxHeight = -1000;
 
 data.forEach(m => {
 
-  let t = new Date(m.time);
+let t = new Date(
+  m.time < 1e12 ? m.time * 1000 : m.time
+);
 
   // --- SKC / NSC (no clouds) ---
   if(!m.clouds || m.clouds.length === 0){
@@ -190,8 +192,6 @@ plotTraces = plotTraces.filter(tr => tr.x.length > 0);
 Plotly.newPlot("plot", plotTraces, {
 
   margin:{l:50,r:20,t:20,b:40},
-
-  title: `${icao} Cloud Evolution`,
   
   xaxis:{
     title:"Time [UTC]"
@@ -199,7 +199,7 @@ Plotly.newPlot("plot", plotTraces, {
 
   yaxis:{
     title:"Cloud Base AGL [ft]",
-    range:[-1000, yMax]
+    range:[-yMax/30, yMax+yMax/30]
   }
 
 }, {displaylogo:false});
@@ -269,15 +269,13 @@ Plotly.newPlot("plot3k", plotTraces, {
 
   margin:{l:50,r:20,t:20,b:40},
 
-  title: `${icao} Cloud Evolution`,
-
   xaxis:{
     title:"Time [UTC]"
   },
 
   yaxis:{
     title:"Cloud Base AGL [ft]",
-    range:[-500, 3000]
+    range:[-100, 3100]
   }
 
 }, {displaylogo:false});
