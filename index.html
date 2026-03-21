@@ -2,112 +2,256 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Airport Ceilometer Data</title>
+<title>Ceilometer Cloud Viewer</title>
 
 <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body{font-family:Arial;margin:20px;}
-#plot{height:450px;border:2px solid #444;margin-top:10px;}
-pre{background:#eee;padding:10px;height:200px;overflow:auto;}
-.error{color:red;}
+body{
+  font-family: Arial;
+  margin:10px;
+}
+
+#controls{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+input{
+  padding:6px;
+  font-size:16px;
+}
+
+#metadata{
+  margin-top:5px;
+  font-size:14px;
+}
+
+#messages{
+  margin-top:5px;
+}
+
+#map{
+  height:650px;
+  border:2px solid #444;
+  border-radius:6px;
+  background:white;
+}
+
+#plot{
+  height:450px;
+  border:2px solid #444;
+  border-radius:6px;
+  margin-top:10px;
+}
+
+.warning{ color:orange; }
+.error{ color:red; }
 </style>
 </head>
 
 <body>
 
-<h2>Airport Ceilometer Data v1.04</h2>
+<h2>Ceilometer Cloud Viewer</h2>
 
-<label>Airport ICAO Code:</label>
-<input id="icao" value="KSAN">
+<div id="controls">
+<label>ICAO:</label>
+<input id="icaoInput" value="KSAN">
 
-<label>Prior Hours to Display (max 168):</label>
-<input id="hours" value="24">
+<label>Hours:</label>
+<input id="hoursInput" value="24" type="number">
 
-<button onclick="run()">Run Update</button>
-<br>
-<h3>AviationWeather API Hourly METAR Data Request</h3>
+<button onclick="loadStation()">Load</button>
+</div>
 
-<div id="status"></div>
-<br>
-<h3>AviationWeather API Hourly METAR Data Response</h3>
-<pre id="raw"></pre>
-<br>
-<h3>Airport Cloud Ceiling Time Series Plot</h3>
+<div id="metadata"></div>
+<div id="messages"></div>
+
+<div id="map"></div>
 <div id="plot"></div>
+
+<div style="margin-top:20px;font-size:12px">
+<b>Data Disclaimer</b>
+<p>
+Hourly cloud data (larger bubbles) is based on hourly airport METAR readings which averages the past 30 minutes of data with double weighting for the last 10 minutes of passing sky condition observations.
+</p>
+<p>
+High rate cloud data (smaller bubbles) is quasi-instantaneous with very little averaging. The resulting data is more prone to overall cloud status mischaracterizations in patchy cloud conditions since the observation is the result of a point measurement.
+</p>
+</div>
 
 <script>
 
-async function run(){
+// ---------------- CONFIG ----------------
 
-let icao=document.getElementById("icao").value.toUpperCase();
-let hours=document.getElementById("hours").value;
+const WORKER_URL = "https://YOUR-WORKER-NAME.workers.dev"
+const MAX_HOURS = 168
 
-const api =
-`https://aviationweather.gov/api/data/metar?ids=${icao}&format=json&hours=${hours}`;
+// simple station list (expand later)
+let stations = [
+  {icao:"KSAN",lat:32.733,lon:-117.183,elev:13},
+  {icao:"KLAX",lat:33.94,lon:-118.408,elev:125},
+  {icao:"KDEN",lat:39.861,lon:-104.673,elev:5430}
+]
 
-/* CORS proxy for debugging */
-const url =
-`https://api.allorigins.win/raw?url=${encodeURIComponent(api)}`;
+// ---------------- INPUT VALIDATION ----------------
 
-document.getElementById("status").innerHTML =
-url;
+function validateInputs(){
 
-try{
+  let hours = parseInt(document.getElementById("hoursInput").value)
 
-const r=await fetch(url);
+  if(hours > MAX_HOURS){
+    hours = MAX_HOURS
+    document.getElementById("hoursInput").value = MAX_HOURS
 
-document.getElementById("status").innerHTML +=
-"<br>Status: "+r.status;
+    document.getElementById("messages").innerHTML =
+      "<span class='warning'>Max hours is 168. Reset to 168.</span>"
+  }
 
-const data=await r.json();
-
-document.getElementById("raw").textContent =
-JSON.stringify(data,null,2);
-
-plot(data);
-
-}catch(err){
-
-document.getElementById("status").innerHTML =
-"<span class='error'>Download failed</span>";
-
-console.error(err);
-
+  return hours
 }
 
+// ---------------- FETCH DATA ----------------
+
+async function fetchMetarData(icao, hours){
+
+  try{
+    const res = await fetch(`${WORKER_URL}?station=${icao}&hours=${hours}`)
+
+    if(!res.ok){
+      throw new Error("Bad response")
+    }
+
+    const json = await res.json()
+    return json.data
+
+  }catch(err){
+
+    document.getElementById("messages").innerHTML =
+      "<span class='error'>Failed to load METAR data</span>"
+
+    return []
+  }
 }
 
-function plot(data){
+// ---------------- LOAD STATION ----------------
 
-let x=[];
-let y=[];
+async function loadStation(){
 
-data.forEach(m=>{
+  let icao = document.getElementById("icaoInput").value.toUpperCase()
+  let hours = validateInputs()
 
-if(!m.clouds) return;
+  let station = stations.find(s => s.icao === icao)
 
-m.clouds.forEach(c=>{
+  if(!station){
+    document.getElementById("messages").innerHTML =
+      "<span class='error'>Station not found</span>"
+    return
+  }
 
-x.push(new Date(m.obsTime * 1000));
-y.push(c.base);
+  document.getElementById("metadata").innerHTML =
+    `Elevation: ${station.elev} ft | Lat: ${station.lat} | Lon: ${station.lon}`
 
-});
+  updateMapSelection(station)
 
-});
-
-Plotly.newPlot("plot",[{
-x:x,
-y:y,
-mode:"markers"
-}],{
-xaxis:{title:"Time [UTC]"},
-yaxis:{title:"Cloud Base AGL [ft]"}
-});
-
+  await loadCloudPlot(station, hours)
 }
 
-run();
+// ---------------- MAP ----------------
+
+function initMap(){
+
+  let trace = {
+    type:"scattergeo",
+    mode:"markers",
+    lat:stations.map(s=>s.lat),
+    lon:stations.map(s=>s.lon),
+    text:stations.map(s=>s.icao),
+    marker:{size:8,color:"blue"}
+  }
+
+  let layout = {
+    margin:{l:0,r:0,t:0,b:0},
+    geo:{
+      scope:"usa",
+      projection:{type:"albers usa", scale:1.2},
+      domain:{x:[0,1], y:[0,1]}
+    }
+  }
+
+  Plotly.newPlot("map",[trace],layout,{displaylogo:false})
+
+  document.getElementById("map")
+    .on('plotly_click', function(data){
+      let icao = data.points[0].text
+      document.getElementById("icaoInput").value = icao
+      loadStation()
+    })
+}
+
+function updateMapSelection(station){
+  Plotly.relayout("map",{
+    'geo.center.lat':station.lat,
+    'geo.center.lon':station.lon,
+    'geo.projection.scale':5
+  })
+}
+
+// ---------------- CLOUD PLOT ----------------
+
+async function loadCloudPlot(station, hours){
+
+  const data = await fetchMetarData(station.icao, hours)
+
+  let times = []
+  let heights = []
+  let colors = []
+
+  data.forEach(d => {
+
+    if (!d.clouds) return
+
+    d.clouds.forEach(layer => {
+
+      times.push(new Date(d.time))
+      heights.push(layer.base)
+
+      if (layer.cover === "FEW") colors.push("green")
+      else if (layer.cover === "SCT") colors.push("blue")
+      else if (layer.cover === "BKN") colors.push("orange")
+      else if (layer.cover === "OVC") colors.push("red")
+      else colors.push("gray")
+
+    })
+  })
+
+  let trace = {
+    x: times,
+    y: heights,
+    mode: "markers",
+    marker: {
+      size: 10,
+      color: colors
+    },
+    name: "METAR Clouds"
+  }
+
+  let layout = {
+    margin:{l:40,r:20,t:20,b:40},
+    xaxis:{title:"Time"},
+    yaxis:{title:"Cloud Base (ft AGL)"}
+  }
+
+  Plotly.newPlot("plot",[trace],layout)
+}
+
+// ---------------- INIT ----------------
+
+initMap()
+loadStation()
 
 </script>
 
