@@ -17,7 +17,7 @@ pre{background:#eee;padding:10px;height:200px;overflow:auto;}
 
 <body>
 
-<h2>Airport Ceilometer Data v1.05</h2>
+<h2>Cloudbase v1.06</h2>
 
 <label>Airport ICAO Code:</label>
 <input id="icao" value="KSAN">
@@ -26,8 +26,12 @@ pre{background:#eee;padding:10px;height:200px;overflow:auto;}
 <input id="hours" value="24">
 
 <button onclick="run()">Run Update</button>
-<br>
 
+<br>
+<h3>Airport Cloud Ceiling Time Series Plot</h3>
+<div id="plot"></div>
+
+<br>
 <h3>Cloudflare Worker Request</h3>
 <div id="status"></div>
 
@@ -35,9 +39,15 @@ pre{background:#eee;padding:10px;height:200px;overflow:auto;}
 <h3>Worker JSON Response</h3>
 <pre id="raw"></pre>
 
-<br>
-<h3>Airport Cloud Ceiling Time Series Plot</h3>
-<div id="plot"></div>
+<b>Data Disclaimer</b>
+
+<p>
+Hourly cloud data (larger circles) is based on hourly airport METAR readings from NOAA Aviation Weather API. These observations average the past 30 minutes of ceilometer data with double weighting for the last 10 minutes of passing sky condition observations.
+</p>
+
+<p>
+High rate cloud data (smaller circles) is only averaged over five minutes from Mesonet API. The resulting ceilometer observations are more prone to overall cloud status mischaracterization in patchy cloud conditions than the metar data since the observation is the result of a point measurement with less averaging.
+</p>
 
 <script>
 
