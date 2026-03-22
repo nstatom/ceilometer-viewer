@@ -28,7 +28,11 @@ pre{background:#eee;padding:10px;height:200px;overflow:auto;}
 <label>Prior Hours to Display:</label>
 <input id="hours" value="24">
 
-<button onclick="run()">Run Update</button>
+<button onclick="run()">Update</button>
+
+<br>
+<div id="airportInfo" style="margin-top:10px;"></div>
+
 
 <br>
 <h3 id="title3k"></h3>
@@ -98,12 +102,31 @@ document.getElementById("status").innerHTML +=
 
 const json = await r.json();
 
+// --- Airport Info ---
+if(json.meta){   // adjust if your structure is slightly different
+
+  const lat = json.meta.lat;
+  const lon = json.meta.lon;
+  const alt = json.meta.alt;
+
+  document.getElementById("airportInfo").innerHTML = `
+    <b>${icao} Airport Information:</b>
+    Latitude = ${lat}, Longitude = ${lon}, Altitude = ${alt} ft.
+    <br>
+    <span style="font-size:0.9em;">
+      Note: Plotted cloud heights are in reference to airport ground elevation.
+    </span>
+  `;
+}
+
 if(!json.data || !Array.isArray(json.data)){
   document.getElementById("status").innerHTML +=
     "<br><span class='error'>Invalid data returned</span>";
   console.log("Bad response:", json);
   return;
 }
+
+
 
 // show full response
 document.getElementById("raw").textContent =
