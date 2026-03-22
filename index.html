@@ -147,7 +147,7 @@ try {
 
   // title
   document.getElementById("titleMesonet").innerText =
-    `${icao} Past ${hours} Hour Mesonet High-Rate Cloud Data Timeline`;
+    `${icao} Past ${hours} Hour HR Cloud Data Timeline`;
 
   // plot
   plotMesonet(json2.data, icao);
@@ -260,13 +260,13 @@ let maxHeight = -1000;
 
 data.forEach(m => {
 
+let t = new Date(m.time * 1000);
+
 // --- IFR category (plot at fixed height) ---
 if(m.ifr && traces[m.ifr]){
   traces[m.ifr].x.push(t);
   traces[m.ifr].y.push(-500);
 }
-
-let t = new Date(m.time * 1000);
 
   // --- SKC / NSC (no clouds) ---
   if(!m.clouds || m.clouds.length === 0){
@@ -502,12 +502,6 @@ function plotMesonet(data, icao){
   };
 
   data.forEach(m => {
-
-// --- IFR category (plot at fixed height) ---
-if(m.ifr && traces[m.ifr]){
-  traces[m.ifr].x.push(t);
-  traces[m.ifr].y.push(-500);
-}
 
     let t = new Date(m.time * 1000);
 
