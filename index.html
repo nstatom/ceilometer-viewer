@@ -519,10 +519,20 @@ function plotMesonet(data, icao){
 
     margin:{l:50,r:20,t:20,b:40},
 
-    xaxis:{ title:"Local Time" },
+    xaxis:{ 
+	  title:{
+	    text:"Local Time",
+		font:{size:18, family:"Arial Black"}
+	  }
+	  tickfont:{size:18, family:"Arial Black"}
+	},
 
     yaxis:{
-      title:"Cloud Base AGL [ft]",
+      title:{
+	    text:"Cloud Base AGL [ft]",
+		font:{size:18, family:"Arial Black"}
+	  }
+	  tickfont:{size:18, family:"Arial Black"}
       range:[-100, 10000] // wider for debugging
     }
 
