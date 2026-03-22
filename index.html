@@ -103,10 +103,10 @@ let icao = document.getElementById("icao").value.toUpperCase();
 let hours = parseInt(document.getElementById("hours").value);
 
 document.getElementById("title3k").innerText =
-  `${icao} Past ${hours} Hour Low Cloud Timeline (=< 3000 ft)`;
+  `${icao} Past ${hours} Hour Low Cloud and Flight Rules Category Timeline (=< 3000 ft)`;
 
 document.getElementById("titleFull").innerText =
-  `${icao} Past ${hours} Hour Full Cloud Timeline`;
+  `${icao} Past ${hours} Hour Full Cloud and Flight Rules Category Timeline`;
 
 // enforce max
 if(hours > 168){
@@ -191,7 +191,7 @@ if(json.station){   // adjust if your structure is slightly different
 
 		document.getElementById("airportInfo").innerHTML = `
 		<b>${icao} Airport Information:</b>
-		Latitude = ${lat}, Longitude = ${lon}, Elevation = ${alt} ft. Note: Plotted cloud heights below are in reference to the airport <u>ground</u> elevation and rounded to the nearest 100 ft. Add airport elevation to get cloud MSL heights.
+		Latitude = ${lat}, Longitude = ${lon}, Elevation = ${alt} ft. Note: Plotted cloud heights below are in reference to the airport <u>ground</u> elevation and rounded to the nearest 100 ft. Add airport elevation to get cloud MSL heights. Clear sky conditions are plotted at 0 ft elevation and the flight rules category is plotted at a negative elevation arbitrarily. 
 		<br>
 		`;
 	}
@@ -229,7 +229,7 @@ function plot(data, icao){
 
 let traces = {
   SKC: {x:[], y:[], mode:"markers", name:"SKC",
-        marker:{color:"yellow", size:20, symbol:"triangle-up"}},
+        marker:{color:"yellow", size:15, symbol:"circle"}},
 
   FEW: {x:[], y:[], mode:"markers", name:"FEW",
         marker:{color:"green", size:15, symbol:"circle"}},
@@ -242,6 +242,18 @@ let traces = {
 
   OVC: {x:[], y:[], mode:"markers", name:"OVC",
         marker:{color:"black", size:15, symbol:"circle"}}
+		
+  LIFR: {x:[], y:[], mode:"markers", name:"LIFR",
+        marker:{color:"purple", size:15, symbol:"square"}},
+
+  IFR: {x:[], y:[], mode:"markers", name:"IFR",
+        marker:{color:"red", size:15, symbol:"square"}},
+
+  MVFR: {x:[], y:[], mode:"markers", name:"MVFR",
+        marker:{color:"blue", size:15, symbol:"square"}},
+
+  VFR: {x:[], y:[], mode:"markers", name:"VFR",
+        marker:{color:"green", size:15, symbol:"square"}}
 };
 
 let maxHeight = -1000;
@@ -308,7 +320,7 @@ function plot3k(data, icao){
 
 let traces = {
   SKC: {x:[], y:[], mode:"markers", name:"SKC",
-        marker:{color:"yellow", size:20, symbol:"triangle-up"}},
+        marker:{color:"yellow", size:15, symbol:"circle"}},
 
   FEW: {x:[], y:[], mode:"markers", name:"FEW",
         marker:{color:"green", size:15, symbol:"circle"}},
@@ -321,6 +333,18 @@ let traces = {
 
   OVC: {x:[], y:[], mode:"markers", name:"OVC",
         marker:{color:"black", size:15, symbol:"circle"}}
+		
+  LIFR: {x:[], y:[], mode:"markers", name:"LIFR",
+        marker:{color:"purple", size:15, symbol:"square"}},
+
+  IFR: {x:[], y:[], mode:"markers", name:"IFR",
+        marker:{color:"red", size:15, symbol:"square"}},
+
+  MVFR: {x:[], y:[], mode:"markers", name:"MVFR",
+        marker:{color:"blue", size:15, symbol:"square"}},
+
+  VFR: {x:[], y:[], mode:"markers", name:"VFR",
+        marker:{color:"green", size:15, symbol:"square"}}
 };
 
 let maxHeight = -500;
@@ -450,7 +474,7 @@ function plotMesonet(data, icao){
 
   let traces = {
     SKC: {x:[], y:[], mode:"markers", name:"SKC",
-          marker:{color:"yellow", size:8, symbol:"triangle-up"}},
+          marker:{color:"yellow", size:6}},
 
     FEW: {x:[], y:[], mode:"markers", name:"FEW",
           marker:{color:"green", size:6}},
