@@ -19,7 +19,7 @@ pre{background:#eee;padding:10px;height:200px;overflow:auto;}
 
 <h1 style="display:flex; align-items:center; gap:7px;">
   <img src="CloudbaseLogo.png" style="height:40px;">
-  Cloudbase v1.09
+  Cloudbase
 </h1>
 
 <label>Airport ICAO Code:</label>
@@ -33,6 +33,10 @@ pre{background:#eee;padding:10px;height:200px;overflow:auto;}
 <br>
 <br>
 <div id="airportInfo" style="margin-top:10px;"></div>
+
+<br>
+<h3 id="ifr_status"></h3>
+<div id="plotIFR"></div>
 
 <br>
 <h3 id="title3k"></h3>
@@ -71,6 +75,10 @@ Hourly cloud data (larger icons) is based on airport METAR readings that are ext
 
 <p>
 High rate cloud data (smaller icons) derives from the same METAR stations but is extracted from the Iowa State Mesonet API. The resulting ceilometer observations are more prone to overall cloud status mischaracterization in patchy cloud conditions than the METAR data since each observation is the result of a 5 minute collection of point measurements with normal averaging.
+</p>
+
+<p>
+This site was made by Nick Statom of the Air-Sea Interaction Lab at Scripps Institution of Oceanography. While users are free to utilize this site, they assume all responsibility for their usage and any associated risks or outcomes.
 </p>
 
 <script>
@@ -174,7 +182,7 @@ if(json.station){   // adjust if your structure is slightly different
 
 		document.getElementById("airportInfo").innerHTML = `
 		<b>${icao} Airport Information:</b>
-		Latitude = ${lat}, Longitude = ${lon}, Elevation = ${alt} ft. Note: Plotted cloud heights below are in reference to airport <u>ground</u> elevation and rounded to nearest 100 ft. Add airport elevation offset to get MSL heights.
+		Latitude = ${lat}, Longitude = ${lon}, Elevation = ${alt} ft. Note: Plotted cloud heights below are in reference to the airport <u>ground</u> elevation and rounded to the nearest 100 ft. Add airport elevation to get cloud MSL heights.
 		<br>
 		`;
 	}
@@ -189,6 +197,11 @@ plot3k(json.data, icao);
 
 // Worker returns { data: [...] }
 plot(json.data, icao);
+
+document.getElementById("titleIFR").innerText =
+  `${icao} Flight Category Timeline`;
+
+plotIFR(json.data, "plotIFR");
 
 }catch(err){
 
@@ -206,7 +219,7 @@ console.error(err);
 function plot(data, icao){
 
 let traces = {
-  SKC: {x:[], y:[], mode:"markers", name:"SKC/NSC",
+  SKC: {x:[], y:[], mode:"markers", name:"SKC",
         marker:{color:"yellow", size:20, symbol:"triangle-up"}},
 
   FEW: {x:[], y:[], mode:"markers", name:"FEW",
@@ -285,7 +298,7 @@ Plotly.newPlot("plot", plotTraces, {
 function plot3k(data, icao){
 
 let traces = {
-  SKC: {x:[], y:[], mode:"markers", name:"SKC/NSC",
+  SKC: {x:[], y:[], mode:"markers", name:"SKC",
         marker:{color:"yellow", size:20, symbol:"triangle-up"}},
 
   FEW: {x:[], y:[], mode:"markers", name:"FEW",
@@ -356,6 +369,63 @@ Plotly.newPlot("plot3k", plotTraces, {
 
 }
 
+
+//Plot IFR
+function plotIFR(data, divId){
+
+  const colors = {
+    LIFR: "purple",
+    IFR: "red",
+    MVFR: "blue",
+    VFR: "green"
+  };
+
+  let shapes = [];
+
+  for(let i = 0; i < data.length; i++){
+
+    let m = data[i];
+
+    if(!m.ifr) continue; // skip if missing
+
+    let t0 = new Date(m.time * 1000);
+
+    let t1;
+    if(i < data.length - 1){
+      t1 = new Date(data[i+1].time * 1000);
+    } else {
+      t1 = new Date(m.time * 1000 + 3600 * 1000); // extend 1 hour for METAR
+    }
+
+    let cat = m.ifr;
+
+    shapes.push({
+      type: "rect",
+      xref: "x",
+      yref: "paper",
+      x0: t0,
+      x1: t1,
+      y0: 0,
+      y1: 1,
+      fillcolor: colors[cat] || "gray",
+      line: {width: 0}
+    });
+  }
+
+  Plotly.newPlot(divId, [], {
+
+    margin:{l:50,r:20,t:20,b:40},
+
+    xaxis:{ title:"Local Time" },
+
+    yaxis:{ visible:false },
+
+    shapes: shapes
+
+  }, {displaylogo:false});
+}
+
+
 //Plot Mesonet
 function plotMesonet(data, icao){
 
@@ -365,7 +435,7 @@ function plotMesonet(data, icao){
 	}
 
   let traces = {
-    SKC: {x:[], y:[], mode:"markers", name:"SKC/NSC",
+    SKC: {x:[], y:[], mode:"markers", name:"SKC",
           marker:{color:"yellow", size:8, symbol:"triangle-up"}},
 
     FEW: {x:[], y:[], mode:"markers", name:"FEW",
