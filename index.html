@@ -8,7 +8,7 @@
 
 <style>
 body{font-family:Arial;margin:20px;}
-#plot, #plot3k{height:450px;border:2px solid #444;margin-top:10px;}
+#plot, #plot3k, #plotMesonet{height:450px;border:2px solid #444;margin-top:10px;}
 pre{background:#eee;padding:10px;height:200px;overflow:auto;}
 .error{color:red;}
 .warning{color:orange;}
@@ -38,10 +38,13 @@ pre{background:#eee;padding:10px;height:200px;overflow:auto;}
 <h3 id="title3k"></h3>
 <div id="plot3k"></div>
 
-
 <br>
 <h3 id="titleFull"></h3>
 <div id="plot"></div>
+
+<br>
+<h3 id="titleMesonet"></h3>
+<div id="plotMesonet" style="height:450px; border:2px solid #444; margin-top:10px;"></div>
 
 <br>
 <h3>Aviation Weather METAR Data Request</h3>
@@ -64,7 +67,8 @@ High rate cloud data (smaller icons) derives from the same METAR stations but is
 
 <script>
 
-const WORKER_URL = "https://noaa-fetch.nstatom.workers.dev"
+const WORKER_URL = "https://noaa-fetch.nstatom.workers.dev";
+const MESONET_URL = "https://mesonet-fetch.nstatom.workers.dev";
 
 // ---------------- RUN ----------------
 
@@ -86,6 +90,35 @@ if(hours > 168){
 
   document.getElementById("status").innerHTML =
     "<span class='warning'>Max hours is 168. Reset to 168.</span>";
+}
+
+// ---------------- MESONET FETCH ----------------
+
+const mesoUrl = `${MESONET_URL}?station=${icao}&hours=${hours}`;
+
+try {
+
+  const r2 = await fetch(mesoUrl);
+
+  document.getElementById("status").innerHTML +=
+    "<br>Mesonet Status: " + r2.status;
+
+  const json2 = await r2.json();
+
+  // debug output
+  console.log("Mesonet:", json2);
+
+  // title
+  document.getElementById("titleMesonet").innerText =
+    `${icao} ${hours} Hour Mesonet High-Rate Cloud Data`;
+
+  // plot
+  plotMesonet(json2.data, icao);
+
+} catch(err){
+  document.getElementById("status").innerHTML +=
+    "<br><span class='error'>Mesonet download failed</span>";
+  console.error(err);
 }
 
 // Worker URL
@@ -278,6 +311,68 @@ data.forEach(m => {
   });
 
 });
+
+
+//Plot Mesonet
+function plotMesonet(data, icao){
+
+  let traces = {
+    SKC: {x:[], y:[], mode:"markers", name:"SKC/NSC",
+          marker:{color:"yellow", size:8, symbol:"triangle-up"}},
+
+    FEW: {x:[], y:[], mode:"markers", name:"FEW",
+          marker:{color:"green", size:6}},
+
+    SCT: {x:[], y:[], mode:"markers", name:"SCT",
+          marker:{color:"blue", size:6}},
+
+    BKN: {x:[], y:[], mode:"markers", name:"BKN",
+          marker:{color:"red", size:6}},
+
+    OVC: {x:[], y:[], mode:"markers", name:"OVC",
+          marker:{color:"black", size:6}}
+  };
+
+  data.forEach(m => {
+
+    let t = new Date(m.time * 1000);
+
+    if(!m.clouds || m.clouds.length === 0){
+      traces.SKC.x.push(t);
+      traces.SKC.y.push(0);
+      return;
+    }
+
+    m.clouds.forEach(c => {
+
+      if(!c.base) return;
+
+      if(traces[c.cover]){
+        traces[c.cover].x.push(t);
+        traces[c.cover].y.push(c.base);
+      }
+
+    });
+
+  });
+
+  let plotTraces = Object.values(traces)
+    .filter(tr => tr.x.length > 0);
+
+  Plotly.newPlot("plotMesonet", plotTraces, {
+
+    margin:{l:50,r:20,t:20,b:40},
+
+    xaxis:{ title:"Local Time" },
+
+    yaxis:{
+      title:"Cloud Base AGL [ft]",
+      range:[-100, 10000] // wider for debugging
+    }
+
+  }, {displaylogo:false});
+}
+
 
 // convert traces object → array
 let plotTraces = Object.values(traces);
