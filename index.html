@@ -103,10 +103,10 @@ let icao = document.getElementById("icao").value.toUpperCase();
 let hours = parseInt(document.getElementById("hours").value);
 
 document.getElementById("title3k").innerText =
-  `${icao} ${hours} Hour Low Cloud Evolution (=< 3000 ft)`;
+  `${icao} Past ${hours} Hour Low Cloud Timeline (=< 3000 ft)`;
 
 document.getElementById("titleFull").innerText =
-  `${icao} ${hours} Hour Full Cloud Evolution`;
+  `${icao} Past ${hours} Hour Full Cloud Timeline`;
 
 // enforce max
 if(hours > 168){
@@ -147,7 +147,7 @@ try {
 
   // title
   document.getElementById("titleMesonet").innerText =
-    `${icao} ${hours} Hour Mesonet High-Rate Cloud Data`;
+    `${icao} Past ${hours} Hour Mesonet High-Rate Cloud Data Timeline`;
 
   // plot
   plotMesonet(json2.data, icao);
@@ -208,7 +208,7 @@ plot3k(json.data, icao);
 plot(json.data, icao);
 
 document.getElementById("titleIFR").innerText =
-  `${icao} Flight Category Timeline`;
+  `${icao} Past ${hours} Hour Flight Category Timeline`;
 
 plotIFR(json.data, "plotIFR");
 
@@ -421,7 +421,12 @@ function plotIFR(data, divId){
     });
   }
 
-  Plotly.newPlot(divId, [], {
+Plotly.newPlot(divId, [{
+	x: data.map(m => new Date(m.time * 1000)),
+	y: data.map(() => 1),
+	mode: "lines",
+	line: {width: 0}
+}], {
 
     margin:{l:50,r:20,t:20,b:40},
 
