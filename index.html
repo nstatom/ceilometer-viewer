@@ -146,7 +146,7 @@ try {
 
   // title
   document.getElementById("titleMesonet").innerText =
-    `${icao} Past ${hours} Hours HR Cloud Height Timeline`;
+    `${icao} Past ${hours} Hours HR Low Cloud Height Timeline (<= 3000 ft)`;
 
   // plot
   plotMesonet(json2.data, icao);
@@ -476,7 +476,7 @@ function plotMesonet(data, icao){
 
     yaxis:{
 	  title:"Cloud Base AGL [ft]",
-      range:[-100, 10000]
+      range:[-100, 3100]
     }
 
   }, {displaylogo:false});
