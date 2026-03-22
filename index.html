@@ -260,6 +260,12 @@ let maxHeight = -1000;
 
 data.forEach(m => {
 
+// --- IFR category (plot at fixed height) ---
+if(m.ifr && traces[m.ifr]){
+  traces[m.ifr].x.push(t);
+  traces[m.ifr].y.push(-500);
+}
+
 let t = new Date(m.time * 1000);
 
   // --- SKC / NSC (no clouds) ---
@@ -350,6 +356,12 @@ let traces = {
 let maxHeight = -500;
 
 data.forEach(m => {
+
+// --- IFR category (plot at fixed height) ---
+if(m.ifr && traces[m.ifr]){
+  traces[m.ifr].x.push(t);
+  traces[m.ifr].y.push(-500);
+}
 
   let t = new Date(m.time*1000);
 
@@ -491,6 +503,12 @@ function plotMesonet(data, icao){
 
   data.forEach(m => {
 
+// --- IFR category (plot at fixed height) ---
+if(m.ifr && traces[m.ifr]){
+  traces[m.ifr].x.push(t);
+  traces[m.ifr].y.push(-500);
+}
+
     let t = new Date(m.time * 1000);
 
     if(!m.clouds || m.clouds.length === 0){
@@ -519,28 +537,17 @@ function plotMesonet(data, icao){
 
     margin:{l:50,r:20,t:20,b:40},
 
-    xaxis:{ 
-	  title:{
-	    text:"Local Time",
-		font:{size:18, family:"Arial Black"}
-	  },
-	  tickfont:{size:18, family:"Arial Black"}
+    xaxis:{
+	  title:"Local Time"
 	},
 
     yaxis:{
-      title:{
-	    text:"Cloud Base AGL [ft]",
-		font:{size:18, family:"Arial Black"}
-	  },
-	  tickfont:{size:18, family:"Arial Black"},
-      range:[-100, 10000] // wider for debugging
+	  title:"Cloud Base AGL [ft]",
+      range:[-100, 10000]
     }
 
   }, {displaylogo:false});
 }
-
-
-
 
 // ---------------- INIT ----------------
 
