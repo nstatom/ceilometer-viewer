@@ -78,11 +78,11 @@ pre{background:#eee;padding:10px;height:200px;overflow:auto;}
 <b>Data Disclaimer</b>
 
 <p>
-Hourly cloud data (larger icons) is based on standard airport METAR readings that are extracted from the NOAA Aviation Weather API. These observations average the past 30 minutes of airport ceilometer data with double weighting for the last 10 minutes of passing sky condition observations.
+Hourly cloud data (larger icons) are based on standard airport METAR readings that are extracted from the NOAA Aviation Weather API. These observations average the past 30 minutes of airport ceilometer data with double weighting for the last 10 minutes of passing sky condition observations.
 </p>
 
 <p>
-High rate cloud data (smaller icons) are generated from the same METAR stations but is extracted from the Iowa State Mesonet API. The resulting ceilometer observations may be more prone to overall cloud status mischaracterization in patchy cloud conditions than the hourly METAR data since each HF observation is the result of only a 5 minute collection of vertical point measurements with normal averaging.
+High rate cloud data (smaller icons) are generated from the same METAR stations but are extracted from the Iowa State Mesonet API. The resulting ceilometer observations may be more prone to overall cloud status mischaracterization in patchy cloud conditions than the hourly METAR data since each HF observation is the result of only a 5 minute collection of vertical point measurements with normal averaging.
 </p>
 
 <p>
@@ -105,7 +105,7 @@ document.getElementById("title3k").innerText =
   `${icao} Past ${hours} Hours Low Cloud Height and Flight Rules Category Timeline (=< 3000 ft)`;
 
 document.getElementById("titleFull").innerText =
-  `${icao} Past ${hours} Hours Full Cloud Height and Flight Rules Category Timeline`;
+  `${icao} Past ${hours} Hours Full Range Cloud Height and Flight Rules Category Timeline`;
 
 // enforce max
 if(hours > 168){
@@ -190,15 +190,15 @@ if(json.station){   // adjust if your structure is slightly different
 
 		document.getElementById("airportInfo").innerHTML = `
 		<b>${icao} Airport Information:</b>
-		Latitude = ${lat}, Longitude = ${lon}, Elevation = ${alt} ft.
+		Latitude = <u>${lat}</u>, Longitude = <u>${lon}</u>, Elevation = <u>${alt}</u> ft.
 		<br>
 		`;
 	}
 }
 
 document.getElementById("plotInfo").innerHTML = `
-<b>Cloud Height Plots Information:</b>
-Plotted cloud heights below are in reference to the airport <b>ground</b> elevation and rounded to the nearest 100 ft. Add the airport elevation that is listed above to get cloud MSL heights. Clear sky conditions are plotted at 0 ft elevation and the flight rules category is plotted at a negative elevation arbitrarily for convenience. Remember that overcast conditions can obscure higher elevation clouds from being detected by the ceilometer. Data outages may occur due to changes in the source APIs or issues with the source data storage servers.
+<b>Cloud Height Plot Information:</b>
+Plotted cloud heights below are in reference to the airport <b>ground</b> elevation and rounded to the nearest 100 ft. Add the airport elevation that is listed above to get cloud MSL heights. Clear sky conditions (yellow circles) are plotted at 0 ft elevation and the flight rules category is plotted at a negative elevation arbitrarily for convenience. Overcast conditions will obscure higher elevation clouds from being detected by the ceilometer. Data outages may occur occasionally due to changes in the source APIs or issues with the source data storage servers.
 <br>
 `;
 
