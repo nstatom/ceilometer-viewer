@@ -34,7 +34,7 @@ pre{background:#eee;padding:10px;height:200px;overflow:auto;}
 <label>Airport ICAO Code:</label>
 <input id="icao" value="KSAN">
 
-<label>Prior Hours to Display:</label>
+<label>   Prior Hours to Display:</label>
 <input id="hours" value="24">
 
 <button onclick="run()">Update</button>
@@ -86,7 +86,7 @@ High rate cloud data (smaller icons) are generated from the same METAR stations 
 </p>
 
 <p>
-This website was made by Nick Statom of the Air-Sea Interaction Lab at Scripps Institution of Oceanography and is not actively monitored and rarely updated. Users who utilize this site assume all responsibility for their usage and any associated risks or outcomes.
+This website was made by Nick Statom of the Air-Sea Interaction Lab at Scripps Institution of Oceanography and is not actively monitored and rarely updated. Users who utilize this site assume all risk and responsibility.
 </p>
 
 <script>
@@ -198,7 +198,7 @@ if(json.station){   // adjust if your structure is slightly different
 
 document.getElementById("plotInfo").innerHTML = `
 <b>Cloud Height Plot Information:</b>
-Currently the plots can contain only up to 168 hours (1 week) of METAR data. Plotted cloud heights are in reference to the airport <b>ground</b> elevation and rounded to the nearest 100 ft. Add the airport elevation that is listed above to get cloud MSL heights. Clear sky conditions (yellow circles) are plotted at 0 ft elevation and the flight rules category is plotted at a negative elevation arbitrarily for convenience. Overcast conditions will obscure higher elevation clouds from being detected by the ceilometer. Data outages may occur occasionally due to changes in the source APIs or issues with the source data storage servers.
+Currently the plots can contain up to 168 hours (1 week) of METAR data. Plotted cloud heights are in reference to the airport <b>ground</b> elevation and rounded to the nearest 100 ft. Add the airport elevation that is listed above to get cloud MSL heights. Clear sky conditions (yellow circles) are plotted at 0 ft elevation and the flight rules category is plotted at a negative elevation arbitrarily for data tracking convenience. Overcast conditions will obscure higher elevation clouds from being detected by the ceilometer. Data outages may occur occasionally due to changes in the source APIs or issues with the source data storage servers.
 <br>
 `;
 
