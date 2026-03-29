@@ -99,9 +99,9 @@ const MESONET_URL = "https://mesonet-fetch.nstatom.workers.dev";
 
 async function run(){
   
-let sizes = getMarkerSizes(hours);
 let icao = document.getElementById("icao").value.toUpperCase();
 let hours = parseInt(document.getElementById("hours").value);
+let sizes = getMarkerSizes(hours);
 
 localStorage.setItem("icao", icao);
 localStorage.setItem("hours", hours);
