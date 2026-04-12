@@ -8,7 +8,7 @@
 
 <style>
 body{font-family:Arial;margin:25px;}
-#plot, #plot3k, #plotMesonet, #plotIFR{height:450px;border:2px solid #444;margin-top:10px;}
+#plotfull, #plot3k, #plotMesonet, #plotSynoptic, #plotIFR{height:450px;border:2px solid #444;margin-top:10px;}
 pre{background:#eee;padding:10px;height:200px;overflow:auto;}
 .error{color:red;}
 .warning{color:orange;}
@@ -54,7 +54,11 @@ pre{background:#eee;padding:10px;height:200px;overflow:auto;}
 
 <br>
 <h3 id="titleFull"></h3>
-<div id="plot"></div>
+<div id="plotfull"></div>
+
+<br>
+<h3 id="titleSynoptic"></h3>
+<div id="plotSynoptic"></div>
 
 <br>
 <br>
@@ -84,6 +88,14 @@ Hourly cloud data (larger icons) are based on standard airport METAR readings th
 <pre id="raw2"></pre>
 
 <br>
+<h3>Synoptic HFMETAR Data Request</h3>
+<div id="status3"></div>
+
+<br>
+<h3>Synoptic HFMETAR Data Response</h3>
+<pre id="raw3"></pre>
+
+<br>
 <b>Data Disclaimer</b>
 
 <p>
@@ -92,8 +104,9 @@ This website was made by Nick Statom of the Air-Sea Interaction Lab at Scripps I
 
 <script>
 
-const WORKER_URL = "https://noaa-fetch.nstatom.workers.dev";
+const NOAA_URL = "https://noaa-fetch.nstatom.workers.dev";
 const MESONET_URL = "https://mesonet-fetch.nstatom.workers.dev";
+const SYNOPTIC_URL = "https://synoptic-fetch.nstatom.workers.dev/";
 
 // ---------------- RUN ----------------
 
@@ -167,8 +180,50 @@ try {
 }
 
 
+// ---------------- Synoptic FETCH ----------------
+
+const synopticUrl = `${SYNOPTIC_URL}?station=${icao}&hours=${hours}`;
+
+document.getElementById("status3").innerHTML = synopticUrl;
+
+try {
+
+  const r3 = await fetch(synopticUrl);
+
+  document.getElementById("status3").innerHTML +=
+    "<br>Status: " + r3.status;
+
+  const json3 = await r3.json();
+
+  // show raw response
+  document.getElementById("raw3").textContent =
+    JSON.stringify(json3, null, 2);
+
+  console.log("Synoptic:", json3);
+
+  // validate
+  if(!json3.data || !Array.isArray(json3.data)){
+    document.getElementById("status3").innerHTML +=
+      "<br><span class='error'>Invalid Synoptic data</span>";
+    return;
+  }
+
+  // title
+  document.getElementById("titleSynoptic").innerText =
+    `${icao} ${hours}hr Synoptic Cloud Height`;
+
+  // plot
+  plotSynoptic(json3.data, icao, sizes.small);
+
+} catch(err){
+  document.getElementById("status3").innerHTML +=
+    "<br><span class='error'>Synoptic download failed</span>";
+  console.error(err);
+}
+
+
 // Worker URL
-const url = `${WORKER_URL}?station=${icao}&hours=${hours}`;
+const url = `${NOAA_URL}?station=${icao}&hours=${hours}`;
 
 document.getElementById("status").innerHTML = url;
 
@@ -213,7 +268,7 @@ JSON.stringify(json, null, 2);
 plot3k(json.data, icao, sizes.big);
 
 // Worker returns { data: [...] }
-plot(json.data, icao, sizes.big);
+plotfull(json.data, icao, sizes.big);
 
 }catch(err){
 
@@ -235,9 +290,9 @@ function getMarkerSizes(hours){
   else return {big:18, small:11};
 }
 
-// ---------------- PLOT Full Range ----------------
+// ---------------- PLOT Synoptic Full Range ----------------
 
-function plot(data, icao, markerSize){
+function plotSynoptic(data, icao, markerSize){
 
 let traces = {
   SKC: {x:[], y:[], mode:"markers", name:"SKC",
@@ -318,7 +373,108 @@ let plotTraces = Object.values(traces);
 // remove empty traces (clean legend)
 plotTraces = plotTraces.filter(tr => tr.x.length > 0);
 
-Plotly.newPlot("plot", plotTraces, {
+Plotly.newPlot("plotSynoptic", plotTraces, {
+
+  margin:{l:50,r:20,t:20,b:40},
+  
+  xaxis:{
+    title:"Local Time"
+  },
+
+  yaxis:{
+    title:"Cloud Base AGL [ft]",
+    range:[-3000, 31000]
+  }
+
+}, {displaylogo:false});
+
+}
+
+
+// ---------------- PLOT Full Range ----------------
+
+function plotfull(data, icao, markerSize){
+
+let traces = {
+  SKC: {x:[], y:[], mode:"markers", name:"SKC",
+        marker:{color:"yellow", size:markerSize, symbol:"circle"}},
+
+  FEW: {x:[], y:[], mode:"markers", name:"FEW",
+        marker:{color:"green", size:markerSize, symbol:"circle"}},
+
+  SCT: {x:[], y:[], mode:"markers", name:"SCT",
+        marker:{color:"blue", size:markerSize, symbol:"circle"}},
+
+  BKN: {x:[], y:[], mode:"markers", name:"BKN",
+        marker:{color:"red", size:markerSize, symbol:"circle"}},
+
+  OVC: {x:[], y:[], mode:"markers", name:"OVC/VV",
+        marker:{color:"black", size:markerSize, symbol:"circle"}},
+		
+  VV: {x:[], y:[], mode:"markers", name:"OVC/VV",
+        marker:{color:"black", size:markerSize, symbol:"circle"}},
+		
+  LIFR: {x:[], y:[], mode:"markers", name:"LIFR",
+        marker:{color:"purple", size:markerSize, symbol:"square"}},
+
+  IFR: {x:[], y:[], mode:"markers", name:"IFR",
+        marker:{color:"red", size:markerSize, symbol:"square"}},
+
+  MVFR: {x:[], y:[], mode:"markers", name:"MVFR",
+        marker:{color:"blue", size:markerSize, symbol:"square"}},
+
+  VFR: {x:[], y:[], mode:"markers", name:"VFR",
+        marker:{color:"green", size:markerSize, symbol:"square"}}
+};
+
+let maxHeight = -1000;
+
+data.forEach(m => {
+
+let t = new Date(m.time * 1000);
+
+// --- IFR category (plot at fixed height) ---
+if(m.ifr && traces[m.ifr]){
+  traces[m.ifr].x.push(t);
+  traces[m.ifr].y.push(-2000);
+}
+
+  // --- SKC / NSC (no clouds) ---
+  if(!m.clouds || m.clouds.length === 0){
+    traces.SKC.x.push(t);
+    traces.SKC.y.push(0);
+    return;
+  }
+
+  // --- Cloud layers ---
+  m.clouds.forEach(c => {
+
+    if(!c.base) return;
+
+    let base = c.base;
+    let cover = c.cover;
+
+    if(base > maxHeight) maxHeight = base + 1000;
+
+    if(traces[cover]){
+      traces[cover].x.push(t);
+      traces[cover].y.push(base);
+    }
+
+  });
+
+});
+
+// enforce minimum 3000 ft
+let yMax = Math.max(maxHeight, 3000);
+
+// convert traces object → array
+let plotTraces = Object.values(traces);
+
+// remove empty traces (clean legend)
+plotTraces = plotTraces.filter(tr => tr.x.length > 0);
+
+Plotly.newPlot("plotfull", plotTraces, {
 
   margin:{l:50,r:20,t:20,b:40},
   
