@@ -1,700 +1,1212 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>High Frequency Airport METAR Cloud Plots</title>
+ < !DOCTYPE html >
+ < html >
+ < head >
+ < meta charset = "utf-8" >
+     < title > High Frequency Airport METAR Cloud Plots <  / title >
 
-<script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+     < script src = "https://cdn.plot.ly/plotly-2.30.0.min.js" >  <  / script >
 
-<style>
-body{font-family:Arial;margin:25px;}
-#plotfull, #plot3k, #plotMesonet, #plotSynoptic, #plotIFR{height:450px;border:2px solid #444;margin-top:10px;}
-pre{background:#eee;padding:10px;height:200px;overflow:auto;}
-.error{color:red;}
-.warning{color:orange;}
-</style>
+     < style >
+    body {
+    font - family: Arial;
+    margin: 25px;
+}
+ # plotfull,  # plot3k,  # plotMesonet,  # plotSynoptic,  # plotIFR {
+    height: 450px;
+    border: 2px solid # 444;
+    margin - top: 10px;
+}
+pre {
+    background:  # eee;
+    padding: 10px;
+    height: 200px;
+    overflow: auto;
+}
+.error {
+    color: red;
+}
+.warning {
+    color: orange;
+}
+ <  / style >
 
-<style>
-body{font-family:Arial;margin:25px;}
-#plotIFR{height:100px;border:2px solid #444;margin-top:10px;}
-pre{background:#eee;padding:10px;height:200px;overflow:auto;}
-.error{color:red;}
-.warning{color:orange;}
-</style>
+ < style >
+body {
+    font - family: Arial;
+    margin: 25px;
+}
+ # plotIFR {
+    height: 100px;
+    border: 2px solid # 444;
+    margin - top: 10px;
+}
+pre {
+    background:  # eee;
+    padding: 10px;
+    height: 200px;
+    overflow: auto;
+}
+.error {
+    color: red;
+}
+.warning {
+    color: orange;
+}
+ <  / style >
 
-</head>
+ <  / head >
 
-<body>
+ < body >
 
-<h1 style="display:flex; align-items:center; gap:7px;">
-  <img src="CloudbaseLogoTight.png" style="height:40px;">
-  HF Cloudbase
-</h1>
+ < h1 style = "display:flex; align-items:center; gap:7px;" >
+     < img src = "CloudbaseLogoTight.png" style = "height:40px;" >
+    HF Cloudbase
+     <  / h1 >
 
-<label>Airport ICAO Code:</label>
-<input id="icao" value="KSAN">
+     < label > Airport ICAO Code:  <  / label >
+     < input id = "icao" value = "KSAN" >
 
-&nbsp;&nbsp;
+     & nbsp;
+ & nbsp;
 
-<label>Prior Hours to Display:</label>
-<input id="hours" value="24">
-<button onclick="run()">Update</button>
+ < label > Prior Hours to Display:  <  / label >
+ < input id = "hours" value = "24" >
+     < button onclick = "run()" > Update <  / button >
 
-<br>
-<br>
-<div id="airportInfo" style="margin-top:10px;"></div>
+     < br >
+     < br >
+     < div id = "airportInfo" style = "margin-top:10px;" >  <  / div >
 
-<br>
-<h3 id="titleMesonet"></h3>
-<div id="plotMesonet" style="height:450px; border:2px solid #444; margin-top:10px;"></div>
+     < br >
+     < h3 id = "titleMesonet" >  <  / h3 >
+     < div id = "plotMesonet" style = "height:450px; border:2px solid #444; margin-top:10px;" >  <  / div >
 
-<br>
-<h3 id="title3k"></h3>
-<div id="plot3k"></div>
+     < br >
+     < h3 id = "title3k" >  <  / h3 >
+     < div id = "plot3k" >  <  / div >
 
-<br>
-<h3 id="titleFull"></h3>
-<div id="plotfull"></div>
+     < br >
+     < h3 id = "titleFull" >  <  / h3 >
+     < div id = "plotfull" >  <  / div >
 
-<br>
-<h3 id="titleSynoptic"></h3>
-<div id="plotSynoptic"></div>
+     < br >
+     < h3 id = "titleSynoptic" >  <  / h3 >
+     < div id = "plotSynoptic" >  <  / div >
 
-<br>
-<br>
-<b>Cloud Height Plot Information</b>
+     < br >
+     < br >
+     < b > Cloud Height Plot Information <  / b >
 
-<p>
-Currently the plots can contain up to 168 hours (1 week) of METAR data. Plotted cloud heights are in reference to the airport ground elevation and rounded to the nearest 100 ft. Add the specific airport elevation that is listed above to get cloud heights in reference to MSL. Clear sky conditions (yellow circles) are plotted at 0 ft elevation and the flight rules category is plotted at a negative elevation arbitrarily for data tracking convenience (color coded squares). Note that lower level cloudy conditions (especially overcast) can obscure higher elevation clouds from being detected by the airport's ceilometer.
-</p>
-<p>
-Hourly cloud data (larger icons) are based on standard airport METAR readings that are fetched using the NOAA Aviation Weather API. These observations average the past 30 minutes of airport ceilometer data with double weighting for the last 10 minutes of passing sky condition observations. The flight rules category is not computed for high rate data and therefore omitted from the plot. High frequency (HF) cloud data (smaller icons) are generated from the same METAR stations but are fetched using the Iowa State Mesonet API. The resulting HF ceilometer observations may be more prone to overall cloud status mischaracterization in patchy cloud conditions than the hourly METAR data since each HF observation is the result of only a 5 minute collection of vertical point measurements with standard averaging. 
-</p>
+     < p >
+    Currently the plots can contain up to 168 hours(1 week)of METAR data.Plotted cloud heights are in reference to the airport ground elevation and rounded to the nearest 100 ft.Add the specific airport elevation that is listed above to get cloud heights in reference to MSL.Clear sky conditions(yellow circles)are plotted at 0 ft elevation and the flight rules category is plotted at a negative elevation arbitrarily for data tracking convenience(color coded squares).Note that lower level cloudy conditions(especially overcast)can obscure higher elevation clouds from being detected by the airport 's ceilometer.
+    </p>
+    <p>
+    Hourly cloud data (larger icons) are based on standard airport METAR readings that are fetched using the NOAA Aviation Weather API. These observations average the past 30 minutes of airport ceilometer data with double weighting for the last 10 minutes of passing sky condition observations. The flight rules category is not computed for high rate data and therefore omitted from the plot. High frequency (HF) cloud data (smaller icons) are generated from the same METAR stations but are fetched using the Iowa State Mesonet API. The resulting HF ceilometer observations may be more prone to overall cloud status mischaracterization in patchy cloud conditions than the hourly METAR data since each HF observation is the result of only a 5 minute collection of vertical point measurements with standard averaging.
+    </p>
 
-<br>
-<h3>Aviation Weather METAR Data Request</h3>
-<div id="status"></div>
+    <br>
+    <h3>Aviation Weather METAR Data Request</h3>
+    <div id="status"></div>
 
-<br>
-<h3>Aviation Weather METAR Data Response</h3>
-<pre id="raw"></pre>
+    <br>
+    <h3>Aviation Weather METAR Data Response</h3>
+    <pre id="raw"></pre>
 
-<br>
-<h3>Mesonet HFMETAR Data Request</h3>
-<div id="status2"></div>
+    <br>
+    <h3>Mesonet HFMETAR Data Request</h3>
+    <div id="status2"></div>
 
-<br>
-<h3>Mesonet HFMETAR Data Response</h3>
-<pre id="raw2"></pre>
+    <br>
+    <h3>Mesonet HFMETAR Data Response</h3>
+    <pre id="raw2"></pre>
 
-<br>
-<h3>Synoptic HFMETAR Data Request</h3>
-<div id="status3"></div>
+    <br>
+    <h3>Synoptic HFMETAR Data Request</h3>
+    <div id="status3"></div>
 
-<br>
-<h3>Synoptic HFMETAR Data Response</h3>
-<pre id="raw3"></pre>
+    <br>
+    <h3>Synoptic HFMETAR Data Response</h3>
+    <pre id="raw3"></pre>
 
-<br>
-<b>Data Disclaimer</b>
+    <br>
+    <b>Data Disclaimer</b>
 
-<p>
-This website was made by Nick Statom of the Air-Sea Interaction Lab at Scripps Institution of Oceanography and is not actively monitored and inconsistently updated. Users who utilize this site's data assume all risk and responsibility. Data outages may occur occasionally due to changes in the source APIs or data storage server status.
-</p>
+    <p>
+    This website was made by Nick Statom of the Air-Sea Interaction Lab at Scripps Institution of Oceanography and is not actively monitored and inconsistently updated. Users who utilize this site' s data assume all risk and responsibility.Data outages may occur occasionally due to changes in the source APIs or data storage server status.
+     <  / p >
 
-<script>
+     < script >
 
-const NOAA_URL = "https://noaa-fetch.nstatom.workers.dev";
+    const NOAA_URL = "https://noaa-fetch.nstatom.workers.dev";
 const MESONET_URL = "https://mesonet-fetch.nstatom.workers.dev";
 const SYNOPTIC_URL = "https://synoptic-fetch.nstatom.workers.dev/";
 
 // ---------------- RUN ----------------
 
-async function run(){
-  
-let icao = document.getElementById("icao").value.toUpperCase();
-let hours = parseInt(document.getElementById("hours").value);
-let sizes = getMarkerSizes(hours);
+async function run() {
 
-try {
-  localStorage.setItem("icao", icao);
-  localStorage.setItem("hours", hours);
-} catch(e) {
-  console.warn("localStorage unavailable");
-}
+    let icao = document.getElementById("icao").value.toUpperCase();
+    let hours = parseInt(document.getElementById("hours").value);
+    let sizes = getMarkerSizes(hours);
 
-document.getElementById("title3k").innerText =
-  `${icao} ${hours}hr Low Cloud Height (=< 3000 ft) and Flight Rules Category`;
+    try {
+        localStorage.setItem("icao", icao);
+        localStorage.setItem("hours", hours);
+    } catch (e) {
+        console.warn("localStorage unavailable");
+    }
 
-document.getElementById("titleFull").innerText =
-  `${icao} ${hours}hr Full Range Cloud Height and Flight Rules Category`;
+    document.getElementById("title3k").innerText =
+`${icao} ${hours}hr Low Cloud Height (=< 3000 ft) and Flight Rules Category`;
 
-// enforce max
-if(hours > 168){
-  hours = 168;
-  document.getElementById("hours").value = 168;
+    document.getElementById("titleFull").innerText =
+`${icao} ${hours}hr Full Range Cloud Height and Flight Rules Category`;
 
-  document.getElementById("status").innerHTML =
-    "<span class='warning'>Max hours is 168. Reset to 168.</span>";
-}
+    // enforce max
+    if (hours > 168) {
+        hours = 168;
+        document.getElementById("hours").value = 168;
 
-// ---------------- MESONET FETCH ----------------
+        document.getElementById("status").innerHTML =
+            "<span class='warning'>Max hours is 168. Reset to 168.</span>";
+    }
 
-const mesoUrl = `${MESONET_URL}?station=${icao}&hours=${hours}`;
+    // ---------------- MESONET FETCH ----------------
 
-document.getElementById("status2").innerHTML = mesoUrl;
+    const mesoUrl = `${MESONET_URL}?station=${icao}&hours=${hours}`;
 
-try {
+    document.getElementById("status2").innerHTML = mesoUrl;
 
-  const r2 = await fetch(mesoUrl);
+    try {
 
-  document.getElementById("status2").innerHTML +=
-    "<br>Status: " + r2.status;
+        const r2 = await fetch(mesoUrl);
 
-  const json2 = await r2.json();
+        document.getElementById("status2").innerHTML +=
+        "<br>Status: " + r2.status;
 
-  // show raw response
-  document.getElementById("raw2").textContent =
-    JSON.stringify(json2, null, 2);
+        const json2 = await r2.json();
 
-  console.log("Mesonet:", json2);
+        // show raw response
+        document.getElementById("raw2").textContent =
+            JSON.stringify(json2, null, 2);
 
-  // validate
-  if(!json2.data || !Array.isArray(json2.data)){
-    document.getElementById("status2").innerHTML +=
-      "<br><span class='error'>Invalid Mesonet data</span>";
-    return;
-  }
+        console.log("Mesonet:", json2);
 
-  // title
-  document.getElementById("titleMesonet").innerText =
-    `${icao} ${hours}hr HF Low Cloud Height (<= 3000 ft)`;
+        // validate
+        if (!json2.data || !Array.isArray(json2.data)) {
+            document.getElementById("status2").innerHTML +=
+            "<br><span class='error'>Invalid Mesonet data</span>";
+            return;
+        }
 
-  // plot
-  plotMesonet(json2.data, icao, sizes.small);
+        // title
+        document.getElementById("titleMesonet").innerText =
+`${icao} ${hours}hr HF Low Cloud Height (<= 3000 ft)`;
 
-} catch(err){
-  document.getElementById("status2").innerHTML +=
-    "<br><span class='error'>Mesonet download failed</span>";
-  console.error(err);
-}
+        // plot
+        plotMesonet(json2.data, icao, sizes.small);
 
+    } catch (err) {
+        document.getElementById("status2").innerHTML +=
+        "<br><span class='error'>Mesonet download failed</span>";
+        console.error(err);
+    }
 
-// ---------------- Synoptic FETCH ----------------
+    // ---------------- Synoptic FETCH ----------------
 
-const synopticUrl = `${SYNOPTIC_URL}?station=${icao}&hours=${hours}`;
+    const synopticUrl = `${SYNOPTIC_URL}?station=${icao}&hours=${hours}`;
 
-document.getElementById("status3").innerHTML = synopticUrl;
+    document.getElementById("status3").innerHTML = synopticUrl;
 
-try {
+    try {
 
-  const r3 = await fetch(synopticUrl);
+        const r3 = await fetch(synopticUrl);
 
-  document.getElementById("status3").innerHTML +=
-    "<br>Status: " + r3.status;
+        document.getElementById("status3").innerHTML +=
+        "<br>Status: " + r3.status;
 
-  const json3 = await r3.json();
+        const json3 = await r3.json();
 
-  // show raw response
-  document.getElementById("raw3").textContent =
-    JSON.stringify(json3, null, 2);
+        // show raw response
+        document.getElementById("raw3").textContent =
+            JSON.stringify(json3, null, 2);
 
-  console.log("Synoptic:", json3);
+        console.log("Synoptic:", json3);
 
-  // validate
-  if(!json3.data || !Array.isArray(json3.data)){
-    document.getElementById("status3").innerHTML +=
-      "<br><span class='error'>Invalid Synoptic data</span>";
-    return;
-  }
+        // validate
+        if (!json3.data || !Array.isArray(json3.data)) {
+            document.getElementById("status3").innerHTML +=
+            "<br><span class='error'>Invalid Synoptic data</span>";
+            return;
+        }
 
-  // title
-  document.getElementById("titleSynoptic").innerText =
-    `${icao} ${hours}hr Synoptic Cloud Height`;
+        // title
+        document.getElementById("titleSynoptic").innerText =
+`${icao} ${hours}hr Synoptic Cloud Height`;
 
-  // plot
-  plotSynoptic(json3.data, icao, sizes.small);
+        // plot
+        plotSynoptic(json3.data, icao, sizes.small);
 
-} catch(err){
-  document.getElementById("status3").innerHTML +=
-    "<br><span class='error'>Synoptic download failed</span>";
-  console.error(err);
-}
+    } catch (err) {
+        document.getElementById("status3").innerHTML +=
+        "<br><span class='error'>Synoptic download failed</span>";
+        console.error(err);
+    }
 
+    // Worker URL
+    const url = `${NOAA_URL}?station=${icao}&hours=${hours}`;
 
-// Worker URL
-const url = `${NOAA_URL}?station=${icao}&hours=${hours}`;
+    document.getElementById("status").innerHTML = url;
 
-document.getElementById("status").innerHTML = url;
+    try {
 
-try{
+        const r = await fetch(url);
 
-const r = await fetch(url);
+        document.getElementById("status").innerHTML +=
+        "<br>Status: " + r.status;
 
-document.getElementById("status").innerHTML +=
-"<br>Status: " + r.status;
+        const json = await r.json();
 
-const json = await r.json();
+        if (!json.data || !Array.isArray(json.data)) {
+            document.getElementById("status").innerHTML +=
+            "<br><span class='error'>Invalid data returned</span>";
+            console.log("Bad response:", json);
+            return;
+        }
 
-if(!json.data || !Array.isArray(json.data)){
-  document.getElementById("status").innerHTML +=
-    "<br><span class='error'>Invalid data returned</span>";
-  console.log("Bad response:", json);
-  return;
-}
+        // --- Airport Info ---
+        if (json.station) { // adjust if your structure is slightly different
 
-// --- Airport Info ---
-if(json.station){   // adjust if your structure is slightly different
+            const lat = json.station?.lat;
+            const lon = json.station?.lon;
+            const alt = json.station?.elev;
 
-	const lat = json.station?.lat;
-	const lon = json.station?.lon;
-	const alt = json.station?.elev;
+            if (lat !== undefined && lon !== undefined) {
 
-	if(lat !== undefined && lon !== undefined){
-
-		document.getElementById("airportInfo").innerHTML = `
+                document.getElementById("airportInfo").innerHTML = `
 		<b>${icao} Airport Information:</b>
 		Latitude = ${lat}, Longitude = ${lon}, Elevation = ${alt} ft.
 		<br>
 		`;
-	}
-}
+            }
+        }
 
-// show full response
-document.getElementById("raw").textContent =
-JSON.stringify(json, null, 2);
+        // show full response
+        document.getElementById("raw").textContent =
+            JSON.stringify(json, null, 2);
 
-// Worker returns { data: [...] }
-plot3k(json.data, icao, sizes.big);
+        // Worker returns { data: [...] }
+        plot3k(json.data, icao, sizes.big);
 
-// Worker returns { data: [...] }
-plotfull(json.data, icao, sizes.big);
+        // Worker returns { data: [...] }
+        plotfull(json.data, icao, sizes.big);
 
-}catch(err){
+    } catch (err) {
 
-document.getElementById("status").innerHTML =
-"<span class='error'>Download failed</span>";
+        document.getElementById("status").innerHTML =
+            "<span class='error'>Download failed</span>";
 
-console.error(err);
+        console.error(err);
 
-}
+    }
 
 }
 
 // ------------Marker size lookup table--------------
-function getMarkerSizes(hours){
-  if(hours > 71) return {big:14, small:7};
-  else if(hours > 23) return {big:15, small:8};
-  else if(hours > 11) return {big:16, small:9};
-  else if(hours > 5) return {big:17, small:10};
-  else return {big:18, small:11};
+function getMarkerSizes(hours) {
+    if (hours > 71)
+        return {
+            big: 14,
+            small: 7
+        };
+    else if (hours > 23)
+        return {
+            big: 15,
+            small: 8
+        };
+    else if (hours > 11)
+        return {
+            big: 16,
+            small: 9
+        };
+    else if (hours > 5)
+        return {
+            big: 17,
+            small: 10
+        };
+    else
+        return {
+            big: 18,
+            small: 11
+        };
 }
 
 // ---------------- PLOT Synoptic Full Range ----------------
 
-function plotSynoptic(data, icao, markerSize){
+function plotSynoptic(data, icao, markerSize) {
 
-let traces = {
-  SKC_STD: {x:[], y:[], mode:"markers", name:"SKC (STD)",
-        marker:{color:"yellow", size:markerSize, symbol:"circle", opacity:1}},
+    let traces = {
+        SKC_STD: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "SKC (STD)",
+            marker: {
+                color: "yellow",
+                size: markerSize,
+                symbol: "circle",
+                opacity: 1
+            }
+        },
 
-  FEW_STD: {x:[], y:[], mode:"markers", name:"FEW (STD)",
-        marker:{color:"green", size:markerSize, symbol:"circle", opacity:1}},
+        FEW_STD: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "FEW (STD)",
+            marker: {
+                color: "green",
+                size: markerSize,
+                symbol: "circle",
+                opacity: 1
+            }
+        },
 
-  SCT_STD: {x:[], y:[], mode:"markers", name:"SCT (STD)",
-        marker:{color:"blue", size:markerSize, symbol:"circle", opacity:1}},
+        SCT_STD: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "SCT (STD)",
+            marker: {
+                color: "blue",
+                size: markerSize,
+                symbol: "circle",
+                opacity: 1
+            }
+        },
 
-  BKN_STD: {x:[], y:[], mode:"markers", name:"BKN (STD)",
-        marker:{color:"red", size:markerSize, symbol:"circle", opacity:1}},
+        BKN_STD: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "BKN (STD)",
+            marker: {
+                color: "red",
+                size: markerSize,
+                symbol: "circle",
+                opacity: 1
+            }
+        },
 
-  OVC_STD: {x:[], y:[], mode:"markers", name:"OVC/VV (STD)",
-        marker:{color:"black", size:markerSize, symbol:"circle", opacity:1}},
-		
-  VV_STD: {x:[], y:[], mode:"markers", name:"OVC/VV (STD)",
-        marker:{color:"black", size:markerSize, symbol:"circle", opacity:1}},
-		
-  LIFR_STD: {x:[], y:[], mode:"markers", name:"LIFR (STD)",
-        marker:{color:"purple", size:markerSize, symbol:"square", opacity:1}},
+        OVC_STD: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "OVC/VV (STD)",
+            marker: {
+                color: "black",
+                size: markerSize,
+                symbol: "circle",
+                opacity: 1
+            }
+        },
 
-  IFR_STD: {x:[], y:[], mode:"markers", name:"IFR (STD)",
-        marker:{color:"red", size:markerSize, symbol:"square", opacity:1}},
+        VV_STD: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "OVC/VV (STD)",
+            marker: {
+                color: "black",
+                size: markerSize,
+                symbol: "circle",
+                opacity: 1
+            }
+        },
 
-  MVFR_STD: {x:[], y:[], mode:"markers", name:"MVFR (STD)",
-        marker:{color:"blue", size:markerSize, symbol:"square", opacity:1}},
+        LIFR_STD: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "LIFR (STD)",
+            marker: {
+                color: "purple",
+                size: markerSize,
+                symbol: "square",
+                opacity: 1
+            }
+        },
 
-  VFR_STD: {x:[], y:[], mode:"markers", name:"VFR (STD)",
-        marker:{color:"green", size:markerSize, symbol:"square", opacity:1}},
-		
-  SKC_HF: {x:[], y:[], mode:"markers", name:"SKC (HF)",
-        marker:{color:"yellow", size:markerSize, symbol:"circle-open", opacity:1}},
+        IFR_STD: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "IFR (STD)",
+            marker: {
+                color: "red",
+                size: markerSize,
+                symbol: "square",
+                opacity: 1
+            }
+        },
 
-  FEW_HF: {x:[], y:[], mode:"markers", name:"FEW (HF)",
-        marker:{color:"green", size:markerSize, symbol:"circle-open", opacity:1}},
+        MVFR_STD: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "MVFR (STD)",
+            marker: {
+                color: "blue",
+                size: markerSize,
+                symbol: "square",
+                opacity: 1
+            }
+        },
 
-  SCT_HF: {x:[], y:[], mode:"markers", name:"SCT (HF)",
-        marker:{color:"blue", size:markerSize, symbol:"circle-open", opacity:1}},
+        VFR_STD: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "VFR (STD)",
+            marker: {
+                color: "green",
+                size: markerSize,
+                symbol: "square",
+                opacity: 1
+            }
+        },
 
-  BKN_HF: {x:[], y:[], mode:"markers", name:"BKN (HF)",
-        marker:{color:"red", size:markerSize, symbol:"circle-open", opacity:1}},
+        SKC_HF: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "SKC (HF)",
+            marker: {
+                color: "yellow",
+                size: markerSize * 0.5,
+                symbol: "circle-open",
+                opacity: 1
+            }
+        },
 
-  OVC_HF: {x:[], y:[], mode:"markers", name:"OVC/VV (HF)",
-        marker:{color:"black", size:markerSize, symbol:"circle-open", opacity:1}},
-		
-  VV_HF: {x:[], y:[], mode:"markers", name:"OVC/VV (HF)",
-        marker:{color:"black", size:markerSize, symbol:"circle-open", opacity:1}},
-		
-  LIFR_HF: {x:[], y:[], mode:"markers", name:"LIFR (HF)",
-        marker:{color:"purple", size:markerSize, symbol:"square-open", opacity:1}},
+        FEW_HF: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "FEW (HF)",
+            marker: {
+                color: "green",
+                size: markerSize * 0.5,
+                symbol: "circle-open",
+                opacity: 1
+            }
+        },
 
-  IFR_HF: {x:[], y:[], mode:"markers", name:"IFR (HF)",
-        marker:{color:"red", size:markerSize, symbol:"square-open", opacity:1}},
+        SCT_HF: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "SCT (HF)",
+            marker: {
+                color: "blue",
+                size: markerSize * 0.5,
+                symbol: "circle-open",
+                opacity: 1
+            }
+        },
 
-  MVFR_HF: {x:[], y:[], mode:"markers", name:"MVFR (HF)",
-        marker:{color:"blue", size:markerSize, symbol:"square-open", opacity:1}},
+        BKN_HF: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "BKN (HF)",
+            marker: {
+                color: "red",
+                size: markerSize * 0.5,
+                symbol: "circle-open",
+                opacity: 1
+            }
+        },
 
-  VFR_HF: {x:[], y:[], mode:"markers", name:"VFR (HF)",
-        marker:{color:"green", size:markerSize, symbol:"square-open", opacity:1}}
-};
+        OVC_HF: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "OVC/VV (HF)",
+            marker: {
+                color: "black",
+                size: markerSize * 0.5,
+                symbol: "circle-open",
+                opacity: 1
+            }
+        },
 
-let maxHeight = -1000;
+        VV_HF: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "OVC/VV (HF)",
+            marker: {
+                color: "black",
+                size: markerSize * 0.5,
+                symbol: "circle-open",
+                opacity: 1
+            }
+        },
 
-data.forEach(m => {
+        LIFR_HF: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "LIFR (HF)",
+            marker: {
+                color: "purple",
+                size: markerSize * 0.5,
+                symbol: "square-open",
+                opacity: 1
+            }
+        },
 
-  let t = new Date(m.time * 1000);
-  let isHF = (m.source === "HF");
+        IFR_HF: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "IFR (HF)",
+            marker: {
+                color: "red",
+                size: markerSize * 0.5,
+                symbol: "square-open",
+                opacity: 1
+            }
+        },
 
-  // --- IFR category ---
-  if(m.ifr){
-    let key = `${m.ifr}_${isHF ? "HF" : "STD"}`;
-    if(traces[key]){
-      traces[key].x.push(t);
-      traces[key].y.push(-2000);
-    }
-  }
+        MVFR_HF: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "MVFR (HF)",
+            marker: {
+                color: "blue",
+                size: markerSize * 0.5,
+                symbol: "square-open",
+                opacity: 1
+            }
+        },
 
-  // --- SKC ---
-  if(!m.clouds || m.clouds.length === 0){
-    let key = isHF ? "SKC_HF" : "SKC_STD";
-    if(traces[key]){
-      traces[key].x.push(t);
-      traces[key].y.push(0);
-    }
-    return;
-  }
+        VFR_HF: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "VFR (HF)",
+            marker: {
+                color: "green",
+                size: markerSize * 0.5,
+                symbol: "square-open",
+                opacity: 1
+            }
+        }
+    };
 
-  // --- Cloud layers ---
-  m.clouds.forEach(c => {
+    let maxHeight = -1000;
 
-    if(!c.base) return;
+    data.forEach(m => {
 
-    let base = c.base;
-    let cover = c.cover;
-    let key = cover + (isHF ? "_HF" : "_STD");
+        let t = new Date(m.time * 1000);
+        let isHF = (m.source === "HF");
 
-    if(base > maxHeight) maxHeight = base + 1000;
+        // --- IFR category ---
+        if (m.ifr) {
+            let key = `${m.ifr}_${isHF ? "HF" : "STD"}`;
+            if (traces[key]) {
+                traces[key].x.push(t);
+                traces[key].y.push(-2000);
+            }
+        }
 
-    if(traces[key]){
-      traces[key].x.push(t);
-      traces[key].y.push(base);
-    }
+        // --- SKC ---
+        if (!m.clouds || m.clouds.length === 0) {
+            let key = isHF ? "SKC_HF" : "SKC_STD";
+            if (traces[key]) {
+                traces[key].x.push(t);
+                traces[key].y.push(0);
+            }
+            return;
+        }
 
-  });
+        // --- Cloud layers ---
+        m.clouds.forEach(c => {
 
-});
+            if (!c.base)
+                return;
 
-// enforce minimum 3000 ft
-let yMax = Math.max(maxHeight, 3000);
+            let base = c.base;
+            let cover = c.cover;
+            let key = cover + (isHF ? "_HF" : "_STD");
 
-// convert traces object → array
-let plotTraces = Object.values(traces);
+            if (base > maxHeight)
+                maxHeight = base + 1000;
 
-// remove empty traces (clean legend)
-plotTraces = plotTraces.filter(tr => tr.x.length > 0);
+            if (traces[key]) {
+                traces[key].x.push(t);
+                traces[key].y.push(base);
+            }
 
-Plotly.newPlot("plotSynoptic", plotTraces, {
+        });
 
-  margin:{l:50,r:20,t:20,b:40},
-  
-  xaxis:{
-    title:"Local Time"
-  },
+    });
 
-  yaxis:{
-    title:"Cloud Base AGL [ft]",
-    range:[-3000, 31000]
-  }
+    // enforce minimum 3000 ft
+    let yMax = Math.max(maxHeight, 3000);
 
-}, {displaylogo:false});
+    // convert traces object → array
+    let plotTraces = Object.values(traces);
+
+    // remove empty traces (clean legend)
+    plotTraces = plotTraces.filter(tr => tr.x.length > 0);
+
+    Plotly.newPlot("plotSynoptic", plotTraces, {
+
+        margin: {
+            l: 50,
+            r: 20,
+            t: 20,
+            b: 40
+        },
+
+        xaxis: {
+            title: "Local Time"
+        },
+
+        yaxis: {
+            title: "Cloud Base AGL [ft]",
+            range: [-3000, 31000]
+        }
+
+    }, {
+        displaylogo: false
+    });
 
 }
-
 
 // ---------------- PLOT Full Range ----------------
 
-function plotfull(data, icao, markerSize){
+function plotfull(data, icao, markerSize) {
 
-let traces = {
-  SKC: {x:[], y:[], mode:"markers", name:"SKC",
-        marker:{color:"yellow", size:markerSize, symbol:"circle"}},
+    let traces = {
+        SKC: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "SKC",
+            marker: {
+                color: "yellow",
+                size: markerSize,
+                symbol: "circle"
+            }
+        },
 
-  FEW: {x:[], y:[], mode:"markers", name:"FEW",
-        marker:{color:"green", size:markerSize, symbol:"circle"}},
+        FEW: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "FEW",
+            marker: {
+                color: "green",
+                size: markerSize,
+                symbol: "circle"
+            }
+        },
 
-  SCT: {x:[], y:[], mode:"markers", name:"SCT",
-        marker:{color:"blue", size:markerSize, symbol:"circle"}},
+        SCT: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "SCT",
+            marker: {
+                color: "blue",
+                size: markerSize,
+                symbol: "circle"
+            }
+        },
 
-  BKN: {x:[], y:[], mode:"markers", name:"BKN",
-        marker:{color:"red", size:markerSize, symbol:"circle"}},
+        BKN: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "BKN",
+            marker: {
+                color: "red",
+                size: markerSize,
+                symbol: "circle"
+            }
+        },
 
-  OVC: {x:[], y:[], mode:"markers", name:"OVC/VV",
-        marker:{color:"black", size:markerSize, symbol:"circle"}},
-		
-  VV: {x:[], y:[], mode:"markers", name:"OVC/VV",
-        marker:{color:"black", size:markerSize, symbol:"circle"}},
-		
-  LIFR: {x:[], y:[], mode:"markers", name:"LIFR",
-        marker:{color:"purple", size:markerSize, symbol:"square"}},
+        OVC: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "OVC/VV",
+            marker: {
+                color: "black",
+                size: markerSize,
+                symbol: "circle"
+            }
+        },
 
-  IFR: {x:[], y:[], mode:"markers", name:"IFR",
-        marker:{color:"red", size:markerSize, symbol:"square"}},
+        VV: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "OVC/VV",
+            marker: {
+                color: "black",
+                size: markerSize,
+                symbol: "circle"
+            }
+        },
 
-  MVFR: {x:[], y:[], mode:"markers", name:"MVFR",
-        marker:{color:"blue", size:markerSize, symbol:"square"}},
+        LIFR: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "LIFR",
+            marker: {
+                color: "purple",
+                size: markerSize,
+                symbol: "square"
+            }
+        },
 
-  VFR: {x:[], y:[], mode:"markers", name:"VFR",
-        marker:{color:"green", size:markerSize, symbol:"square"}}
-};
+        IFR: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "IFR",
+            marker: {
+                color: "red",
+                size: markerSize,
+                symbol: "square"
+            }
+        },
 
-let maxHeight = -1000;
+        MVFR: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "MVFR",
+            marker: {
+                color: "blue",
+                size: markerSize,
+                symbol: "square"
+            }
+        },
 
-data.forEach(m => {
+        VFR: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "VFR",
+            marker: {
+                color: "green",
+                size: markerSize,
+                symbol: "square"
+            }
+        }
+    };
 
-let t = new Date(m.time * 1000);
+    let maxHeight = -1000;
 
-// --- IFR category (plot at fixed height) ---
-if(m.ifr && traces[m.ifr]){
-  traces[m.ifr].x.push(t);
-  traces[m.ifr].y.push(-2000);
-}
+    data.forEach(m => {
 
-  // --- SKC / NSC (no clouds) ---
-  if(!m.clouds || m.clouds.length === 0){
-    traces.SKC.x.push(t);
-    traces.SKC.y.push(0);
-    return;
-  }
+        let t = new Date(m.time * 1000);
 
-  // --- Cloud layers ---
-  m.clouds.forEach(c => {
+        // --- IFR category (plot at fixed height) ---
+        if (m.ifr && traces[m.ifr]) {
+            traces[m.ifr].x.push(t);
+            traces[m.ifr].y.push(-2000);
+        }
 
-    if(!c.base) return;
+        // --- SKC / NSC (no clouds) ---
+        if (!m.clouds || m.clouds.length === 0) {
+            traces.SKC.x.push(t);
+            traces.SKC.y.push(0);
+            return;
+        }
 
-    let base = c.base;
-    let cover = c.cover;
+        // --- Cloud layers ---
+        m.clouds.forEach(c => {
 
-    if(base > maxHeight) maxHeight = base + 1000;
+            if (!c.base)
+                return;
 
-    if(traces[cover]){
-      traces[cover].x.push(t);
-      traces[cover].y.push(base);
-    }
+            let base = c.base;
+            let cover = c.cover;
 
-  });
+            if (base > maxHeight)
+                maxHeight = base + 1000;
 
-});
+            if (traces[cover]) {
+                traces[cover].x.push(t);
+                traces[cover].y.push(base);
+            }
 
-// enforce minimum 3000 ft
-let yMax = Math.max(maxHeight, 3000);
+        });
 
-// convert traces object → array
-let plotTraces = Object.values(traces);
+    });
 
-// remove empty traces (clean legend)
-plotTraces = plotTraces.filter(tr => tr.x.length > 0);
+    // enforce minimum 3000 ft
+    let yMax = Math.max(maxHeight, 3000);
 
-Plotly.newPlot("plotfull", plotTraces, {
+    // convert traces object → array
+    let plotTraces = Object.values(traces);
 
-  margin:{l:50,r:20,t:20,b:40},
-  
-  xaxis:{
-    title:"Local Time"
-  },
+    // remove empty traces (clean legend)
+    plotTraces = plotTraces.filter(tr => tr.x.length > 0);
 
-  yaxis:{
-    title:"Cloud Base AGL [ft]",
-    range:[-3000, 31000]
-  }
+    Plotly.newPlot("plotfull", plotTraces, {
 
-}, {displaylogo:false});
+        margin: {
+            l: 50,
+            r: 20,
+            t: 20,
+            b: 40
+        },
+
+        xaxis: {
+            title: "Local Time"
+        },
+
+        yaxis: {
+            title: "Cloud Base AGL [ft]",
+            range: [-3000, 31000]
+        }
+
+    }, {
+        displaylogo: false
+    });
 
 }
 
 // ---------------- PLOT 0-3000ft ----------------
 
-function plot3k(data, icao, markerSize){
+function plot3k(data, icao, markerSize) {
 
-let traces = {
-  SKC: {x:[], y:[], mode:"markers", name:"SKC",
-        marker:{color:"yellow", size:markerSize, symbol:"circle"}},
+    let traces = {
+        SKC: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "SKC",
+            marker: {
+                color: "yellow",
+                size: markerSize,
+                symbol: "circle"
+            }
+        },
 
-  FEW: {x:[], y:[], mode:"markers", name:"FEW",
-        marker:{color:"green", size:markerSize, symbol:"circle"}},
+        FEW: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "FEW",
+            marker: {
+                color: "green",
+                size: markerSize,
+                symbol: "circle"
+            }
+        },
 
-  SCT: {x:[], y:[], mode:"markers", name:"SCT",
-        marker:{color:"blue", size:markerSize, symbol:"circle"}},
+        SCT: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "SCT",
+            marker: {
+                color: "blue",
+                size: markerSize,
+                symbol: "circle"
+            }
+        },
 
-  BKN: {x:[], y:[], mode:"markers", name:"BKN",
-        marker:{color:"red", size:markerSize, symbol:"circle"}},
+        BKN: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "BKN",
+            marker: {
+                color: "red",
+                size: markerSize,
+                symbol: "circle"
+            }
+        },
 
-  OVC: {x:[], y:[], mode:"markers", name:"OVC/VV",
-        marker:{color:"black", size:markerSize, symbol:"circle"}},
-	
-  VV: {x:[], y:[], mode:"markers", name:"OVC/VV",
-        marker:{color:"black", size:markerSize, symbol:"circle"}},
-		
-  LIFR: {x:[], y:[], mode:"markers", name:"LIFR",
-        marker:{color:"purple", size:markerSize, symbol:"square"}},
+        OVC: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "OVC/VV",
+            marker: {
+                color: "black",
+                size: markerSize,
+                symbol: "circle"
+            }
+        },
 
-  IFR: {x:[], y:[], mode:"markers", name:"IFR",
-        marker:{color:"red", size:markerSize, symbol:"square"}},
+        VV: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "OVC/VV",
+            marker: {
+                color: "black",
+                size: markerSize,
+                symbol: "circle"
+            }
+        },
 
-  MVFR: {x:[], y:[], mode:"markers", name:"MVFR",
-        marker:{color:"blue", size:markerSize, symbol:"square"}},
+        LIFR: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "LIFR",
+            marker: {
+                color: "purple",
+                size: markerSize,
+                symbol: "square"
+            }
+        },
 
-  VFR: {x:[], y:[], mode:"markers", name:"VFR",
-        marker:{color:"green", size:markerSize, symbol:"square"}}
-};
+        IFR: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "IFR",
+            marker: {
+                color: "red",
+                size: markerSize,
+                symbol: "square"
+            }
+        },
 
-let maxHeight = -500;
+        MVFR: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "MVFR",
+            marker: {
+                color: "blue",
+                size: markerSize,
+                symbol: "square"
+            }
+        },
 
-data.forEach(m => {
+        VFR: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "VFR",
+            marker: {
+                color: "green",
+                size: markerSize,
+                symbol: "square"
+            }
+        }
+    };
 
-  let t = new Date(m.time*1000);
+    let maxHeight = -500;
 
-// --- IFR category (plot at fixed height) ---
-if(m.ifr && traces[m.ifr]){
-  traces[m.ifr].x.push(t);
-  traces[m.ifr].y.push(-200);
-}
+    data.forEach(m => {
 
-  // --- SKC / NSC (no clouds) ---
-  if(!m.clouds || m.clouds.length === 0){
-    traces.SKC.x.push(t);
-    traces.SKC.y.push(0);
-    return;
-  }
+        let t = new Date(m.time * 1000);
 
-  // --- Cloud layers ---
-  m.clouds.forEach(c => {
+        // --- IFR category (plot at fixed height) ---
+        if (m.ifr && traces[m.ifr]) {
+            traces[m.ifr].x.push(t);
+            traces[m.ifr].y.push(-200);
+        }
 
-    if(!c.base) return;
+        // --- SKC / NSC (no clouds) ---
+        if (!m.clouds || m.clouds.length === 0) {
+            traces.SKC.x.push(t);
+            traces.SKC.y.push(0);
+            return;
+        }
 
-    let base = c.base;
-    let cover = c.cover;
+        // --- Cloud layers ---
+        m.clouds.forEach(c => {
 
-    if(base > maxHeight) maxHeight = base + 1000;
+            if (!c.base)
+                return;
 
-    if(traces[cover]){
-      traces[cover].x.push(t);
-      traces[cover].y.push(base);
-    }
+            let base = c.base;
+            let cover = c.cover;
 
-  });
+            if (base > maxHeight)
+                maxHeight = base + 1000;
 
-});
+            if (traces[cover]) {
+                traces[cover].x.push(t);
+                traces[cover].y.push(base);
+            }
 
-// convert traces object → array
-let plotTraces = Object.values(traces);
-
-// remove empty traces (clean legend)
-plotTraces = plotTraces.filter(tr => tr.x.length > 0);
-
-Plotly.newPlot("plot3k", plotTraces, {
-
-  margin:{l:50,r:20,t:20,b:40},
-
-  xaxis:{
-    title:"Local Time"
-  },
-
-  yaxis:{
-    title:"Cloud Base AGL [ft]",
-    range:[-300, 3100]
-  }
-
-}, {displaylogo:false});
-
-}
-
-
-//Plot Mesonet
-function plotMesonet(data, icao, markerSize){
-
-	if(!data || data.length === 0){
-		console.log("Mesonet data empty");
-		return;
-	}
-
-  let traces = {
-    SKC: {x:[], y:[], mode:"markers", name:"SKC",
-          marker:{color:"yellow", size:markerSize}},
-
-    FEW: {x:[], y:[], mode:"markers", name:"FEW",
-          marker:{color:"green", size:markerSize}},
-
-    SCT: {x:[], y:[], mode:"markers", name:"SCT",
-          marker:{color:"blue", size:markerSize}},
-
-    BKN: {x:[], y:[], mode:"markers", name:"BKN",
-          marker:{color:"red", size:markerSize}},
-
-    OVC: {x:[], y:[], mode:"markers", name:"OVC/VV",
-          marker:{color:"black", size:markerSize}},
-		  
-    VV: {x:[], y:[], mode:"markers", name:"OVC/VV",
-          marker:{color:"black", size:markerSize}}
-  };
-
-  data.forEach(m => {
-
-    let t = new Date(m.time * 1000);
-
-    if(!m.clouds || m.clouds.length === 0){
-      traces.SKC.x.push(t);
-      traces.SKC.y.push(0);
-      return;
-    }
-
-    m.clouds.forEach(c => {
-
-      if(!c.base) return;
-
-      if(traces[c.cover]){
-        traces[c.cover].x.push(t);
-        traces[c.cover].y.push(c.base);
-      }
+        });
 
     });
 
-  });
+    // convert traces object → array
+    let plotTraces = Object.values(traces);
 
-  let plotTraces = Object.values(traces)
-    .filter(tr => tr.x.length > 0);
+    // remove empty traces (clean legend)
+    plotTraces = plotTraces.filter(tr => tr.x.length > 0);
 
-  Plotly.newPlot("plotMesonet", plotTraces, {
+    Plotly.newPlot("plot3k", plotTraces, {
 
-    margin:{l:50,r:20,t:20,b:40},
+        margin: {
+            l: 50,
+            r: 20,
+            t: 20,
+            b: 40
+        },
 
-    xaxis:{
-	  title:"Local Time"
-	},
+        xaxis: {
+            title: "Local Time"
+        },
 
-    yaxis:{
-	  title:"Cloud Base AGL [ft]",
-      range:[-100, 3100]
+        yaxis: {
+            title: "Cloud Base AGL [ft]",
+            range: [-300, 3100]
+        }
+
+    }, {
+        displaylogo: false
+    });
+
+}
+
+//Plot Mesonet
+function plotMesonet(data, icao, markerSize) {
+
+    if (!data || data.length === 0) {
+        console.log("Mesonet data empty");
+        return;
     }
 
-  }, {displaylogo:false});
+    let traces = {
+        SKC: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "SKC",
+            marker: {
+                color: "yellow",
+                size: markerSize
+            }
+        },
+
+        FEW: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "FEW",
+            marker: {
+                color: "green",
+                size: markerSize
+            }
+        },
+
+        SCT: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "SCT",
+            marker: {
+                color: "blue",
+                size: markerSize
+            }
+        },
+
+        BKN: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "BKN",
+            marker: {
+                color: "red",
+                size: markerSize
+            }
+        },
+
+        OVC: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "OVC/VV",
+            marker: {
+                color: "black",
+                size: markerSize
+            }
+        },
+
+        VV: {
+            x: [],
+            y: [],
+            mode: "markers",
+            name: "OVC/VV",
+            marker: {
+                color: "black",
+                size: markerSize
+            }
+        }
+    };
+
+    data.forEach(m => {
+
+        let t = new Date(m.time * 1000);
+
+        if (!m.clouds || m.clouds.length === 0) {
+            traces.SKC.x.push(t);
+            traces.SKC.y.push(0);
+            return;
+        }
+
+        m.clouds.forEach(c => {
+
+            if (!c.base)
+                return;
+
+            if (traces[c.cover]) {
+                traces[c.cover].x.push(t);
+                traces[c.cover].y.push(c.base);
+            }
+
+        });
+
+    });
+
+    let plotTraces = Object.values(traces)
+        .filter(tr => tr.x.length > 0);
+
+    Plotly.newPlot("plotMesonet", plotTraces, {
+
+        margin: {
+            l: 50,
+            r: 20,
+            t: 20,
+            b: 40
+        },
+
+        xaxis: {
+            title: "Local Time"
+        },
+
+        yaxis: {
+            title: "Cloud Base AGL [ft]",
+            range: [-100, 3100]
+        }
+
+    }, {
+        displaylogo: false
+    });
 }
 
 // ---------------- INIT ----------------
@@ -703,23 +1215,23 @@ let savedIcao = null;
 let savedHours = null;
 
 try {
-  savedIcao = localStorage.getItem("icao");
-  savedHours = localStorage.getItem("hours");
-} catch(e) {
-  console.warn("localStorage unavailable");
+    savedIcao = localStorage.getItem("icao");
+    savedHours = localStorage.getItem("hours");
+} catch (e) {
+    console.warn("localStorage unavailable");
 }
 
-if(savedIcao){
-  document.getElementById("icao").value = savedIcao;
+if (savedIcao) {
+    document.getElementById("icao").value = savedIcao;
 }
 
-if(savedHours){
-  document.getElementById("hours").value = savedHours;
+if (savedHours) {
+    document.getElementById("hours").value = savedHours;
 }
 
 run();
 
-</script>
+ <  / script >
 
-</body>
-</html>
+ <  / body >
+<  / html >
