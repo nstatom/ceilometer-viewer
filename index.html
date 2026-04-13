@@ -323,7 +323,7 @@ function formatMetarString(m, icao){
 
   // Wind
   const wind = m.wind_speed && m.wind_dir
-    ? `${m.wind_speed}kt from ${m.wind_dir}`
+    ? `${m.wind_spd}kt from ${m.wind_dir}`
     : "N/A";
 
   // Visibility
@@ -331,14 +331,14 @@ function formatMetarString(m, icao){
   ? `${m.visibility}sm`
   : "N/A";
 
-  // Altimeter
-  const alt = m.altim ? `${m.altim}in` : "N/A";
+  // Pressure
+  const pressure = m.pressure ? `${m.pressure}in` : "N/A";
 
   // Temps
   const temp = (m.temp !== undefined) ? `${m.temp}C` : "N/A";
-  const dewp = (m.dewp !== undefined) ? `${m.dewp}C` : "N/A";
+  const dewpoint = (m.dewpoint !== undefined) ? `${m.dewpoint}C` : "N/A";
 
-  return `${icao} ${utc} UTC: ${category} (${source}); Clouds: ${cloudStr}; Wind: ${wind}; Viz: ${viz}; Alt: ${alt}; Temp: ${temp}; Dewp: ${dewp};`;
+  return `${icao} ${utc} UTC: ${category} (${source}); Clouds: ${cloudStr}; Wind: ${wind}; Viz: ${viz}; Press: ${pressure}; Temp: ${temp}; Dewp: ${dewpoint};`;
 }
 
 // ---------------- PLOT Synoptic Full Range ----------------
