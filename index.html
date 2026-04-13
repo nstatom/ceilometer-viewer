@@ -295,56 +295,90 @@ function getMarkerSizes(hours){
 function plotSynoptic(data, icao, markerSize){
 
 let traces = {
-  SKC: {x:[], y:[], mode:"markers", name:"SKC",
-        marker:{color:"yellow", size:markerSize, symbol:"circle", opacity: []}},
+  SKC_STD: {x:[], y:[], mode:"markers", name:"SKC (STD)",
+        marker:{color:"yellow", size:markerSize, symbol:"circle", opacity:1}},
 
-  FEW: {x:[], y:[], mode:"markers", name:"FEW",
-        marker:{color:"green", size:markerSize, symbol:"circle", opacity: []}},
+  FEW_STD: {x:[], y:[], mode:"markers", name:"FEW (STD)",
+        marker:{color:"green", size:markerSize, symbol:"circle", opacity:1}},
 
-  SCT: {x:[], y:[], mode:"markers", name:"SCT",
-        marker:{color:"blue", size:markerSize, symbol:"circle", opacity: []}},
+  SCT_STD: {x:[], y:[], mode:"markers", name:"SCT (STD)",
+        marker:{color:"blue", size:markerSize, symbol:"circle", opacity:1}},
 
-  BKN: {x:[], y:[], mode:"markers", name:"BKN",
-        marker:{color:"red", size:markerSize, symbol:"circle", opacity: []}},
+  BKN_STD: {x:[], y:[], mode:"markers", name:"BKN (STD)",
+        marker:{color:"red", size:markerSize, symbol:"circle", opacity:1}},
 
-  OVC: {x:[], y:[], mode:"markers", name:"OVC/VV",
-        marker:{color:"black", size:markerSize, symbol:"circle", opacity: []}},
+  OVC_STD: {x:[], y:[], mode:"markers", name:"OVC/VV (STD)",
+        marker:{color:"black", size:markerSize, symbol:"circle", opacity:1}},
 		
-  VV: {x:[], y:[], mode:"markers", name:"OVC/VV",
-        marker:{color:"black", size:markerSize, symbol:"circle", opacity: []}},
+  VV_STD: {x:[], y:[], mode:"markers", name:"OVC/VV (STD)",
+        marker:{color:"black", size:markerSize, symbol:"circle", opacity:1}},
 		
-  LIFR: {x:[], y:[], mode:"markers", name:"LIFR",
-        marker:{color:"purple", size:markerSize, symbol:"square", opacity: []}},
+  LIFR_STD: {x:[], y:[], mode:"markers", name:"LIFR (STD)",
+        marker:{color:"purple", size:markerSize, symbol:"square", opacity:1}},
 
-  IFR: {x:[], y:[], mode:"markers", name:"IFR",
-        marker:{color:"red", size:markerSize, symbol:"square", opacity: []}},
+  IFR_STD: {x:[], y:[], mode:"markers", name:"IFR (STD)",
+        marker:{color:"red", size:markerSize, symbol:"square", opacity:1}},
 
-  MVFR: {x:[], y:[], mode:"markers", name:"MVFR",
-        marker:{color:"blue", size:markerSize, symbol:"square", opacity: []}},
+  MVFR_STD: {x:[], y:[], mode:"markers", name:"MVFR (STD)",
+        marker:{color:"blue", size:markerSize, symbol:"square", opacity:1}},
 
-  VFR: {x:[], y:[], mode:"markers", name:"VFR",
-        marker:{color:"green", size:markerSize, symbol:"square", opacity: []}}
+  VFR_STD: {x:[], y:[], mode:"markers", name:"VFR (STD)",
+        marker:{color:"green", size:markerSize, symbol:"square", opacity:1}},
+		
+  SKC_HF: {x:[], y:[], mode:"markers", name:"SKC (HF)",
+        marker:{color:"yellow", size:markerSize, symbol:"circle", opacity:0.5}},
+
+  FEW_HF: {x:[], y:[], mode:"markers", name:"FEW (HF)",
+        marker:{color:"green", size:markerSize, symbol:"circle", opacity:0.5}},
+
+  SCT_HF: {x:[], y:[], mode:"markers", name:"SCT (HF)",
+        marker:{color:"blue", size:markerSize, symbol:"circle", opacity:0.5}},
+
+  BKN_HF: {x:[], y:[], mode:"markers", name:"BKN (HF)",
+        marker:{color:"red", size:markerSize, symbol:"circle", opacity:0.5}},
+
+  OVC_HF: {x:[], y:[], mode:"markers", name:"OVC/VV (HF)",
+        marker:{color:"black", size:markerSize, symbol:"circle", opacity:0.5}},
+		
+  VV_HF: {x:[], y:[], mode:"markers", name:"OVC/VV (HF)",
+        marker:{color:"black", size:markerSize, symbol:"circle", opacity:0.5}},
+		
+  LIFR_HF: {x:[], y:[], mode:"markers", name:"LIFR (HF)",
+        marker:{color:"purple", size:markerSize, symbol:"square", opacity:0.5}},
+
+  IFR_HF: {x:[], y:[], mode:"markers", name:"IFR (HF)",
+        marker:{color:"red", size:markerSize, symbol:"square", opacity:0.5}},
+
+  MVFR_HF: {x:[], y:[], mode:"markers", name:"MVFR (HF)",
+        marker:{color:"blue", size:markerSize, symbol:"square", opacity:0.5}},
+
+  VFR_HF: {x:[], y:[], mode:"markers", name:"VFR (HF)",
+        marker:{color:"green", size:markerSize, symbol:"square", opacity:0.5}}
 };
 
 let maxHeight = -1000;
 
 data.forEach(m => {
 
-let opacity = (m.source === "HF") ? 0.4 : 1.0;
-let t = new Date(m.time * 1000);
+  let t = new Date(m.time * 1000);
+  let isHF = (m.source === "HF");
 
-// --- IFR category (plot at fixed height) ---
-if(m.ifr && traces[m.ifr]){
-  traces[m.ifr].x.push(t);
-  traces[m.ifr].y.push(-2000);
-  traces[m.ifr].marker.opacity.push(opacity);
-}
+  // --- IFR category ---
+  if(m.ifr){
+    let key = `${m.ifr}_${isHF ? "HF" : "STD"}`;
+    if(traces[key]){
+      traces[key].x.push(t);
+      traces[key].y.push(-2000);
+    }
+  }
 
-  // --- SKC / NSC (no clouds) ---
+  // --- SKC ---
   if(!m.clouds || m.clouds.length === 0){
-    traces.SKC.x.push(t);
-    traces.SKC.y.push(0);
-	traces.SKC.marker.opacity.push(opacity);
+    let key = isHF ? "SKC_HF" : "SKC_STD";
+    if(traces[key]){
+      traces[key].x.push(t);
+      traces[key].y.push(0);
+    }
     return;
   }
 
@@ -355,13 +389,13 @@ if(m.ifr && traces[m.ifr]){
 
     let base = c.base;
     let cover = c.cover;
+    let key = cover + (isHF ? "_HF" : "_STD");
 
     if(base > maxHeight) maxHeight = base + 1000;
 
-    if(traces[cover]){
-      traces[cover].x.push(t);
-      traces[cover].y.push(base);
-	  traces[cover].marker.opacity.push(opacity);
+    if(traces[key]){
+      traces[key].x.push(t);
+      traces[key].y.push(base);
     }
 
   });
