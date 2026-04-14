@@ -152,7 +152,7 @@ document.getElementById("decoded").textContent =
   
   // title
   document.getElementById("titleSynoptic").innerText =
-    `${icao} ${hours} hr Cloud Height (<=3000 ft)`;
+    `${icao} ${hours} hr Low Cloud Base (<= 3000 ft)`;
 
   // plot
   plotSynoptic(json3.data, icao, sizes.small);
@@ -303,7 +303,7 @@ data.forEach(m => {
     let key = `${m.ifr}_${isHF ? "HF" : "STD"}`;
     if(traces[key]){
       traces[key].x.push(t);
-      traces[key].y.push(-200);
+      traces[key].y.push(-150);
     }
   }
 
@@ -356,7 +356,7 @@ Plotly.newPlot("plotSynoptic", plotTraces, {
 
   yaxis:{
     title:"Cloud Base AGL [ft]",
-    range:[-300, 3200]
+    range:[-250, 3250]
   }
 
 }, {displaylogo:false});
