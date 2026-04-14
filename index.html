@@ -303,7 +303,7 @@ data.forEach(m => {
     let key = `${m.ifr}_${isHF ? "HF" : "STD"}`;
     if(traces[key]){
       traces[key].x.push(t);
-      traces[key].y.push(-500);
+      traces[key].y.push(-200);
     }
   }
 
@@ -356,7 +356,7 @@ Plotly.newPlot("plotSynoptic", plotTraces, {
 
   yaxis:{
     title:"Cloud Base AGL [ft]",
-    range:[-1000, 3500]
+    range:[-300, 3200]
   }
 
 }, {displaylogo:false});
