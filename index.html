@@ -152,7 +152,7 @@ document.getElementById("decoded").textContent =
   
   // title
   document.getElementById("titleSynoptic").innerText =
-    `${icao} ${hours} hr Cloud Height`;
+    `${icao} ${hours} hr Cloud Height (<=3000 ft)`;
 
   // plot
   plotSynoptic(json3.data, icao, sizes.small);
