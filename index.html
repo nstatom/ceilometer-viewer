@@ -156,7 +156,7 @@ document.getElementById("decoded").textContent =
   
   // title
   document.getElementById("titleSynoptic").innerText =
-    `${icao} ${hours} hr Low Cloud Base (<= 3000 ft)`;
+    `${icao} ${hours} hr Low Cloud Profile (<= 3000 ft)`;
 
   // plot
   plotSynoptic(json3.data, icao, sizes.small);
@@ -368,7 +368,7 @@ Plotly.newPlot("plotSynoptic", plotTraces, {
 // -------- SECOND PLOT (FULL RANGE) --------
 
 document.getElementById("titleSynopticFull").innerText =
-  `${icao} Full Cloud Profile`;
+  `${icao} ${hours} hr Full Cloud Profile`;
 
 Plotly.newPlot("plotSynopticFull", plotTraces, {
 
@@ -384,6 +384,8 @@ Plotly.newPlot("plotSynopticFull", plotTraces, {
   }
 
 }, {displaylogo:false});
+
+}
 
 // ---------------- INIT ----------------
 
