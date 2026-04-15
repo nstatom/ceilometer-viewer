@@ -57,6 +57,10 @@ Hourly cloud data ('STD', larger filled icons) are based on standard airport MET
 </p>
 
 <br>
+<h3 id="titleWind"></h3>
+<div id="plotWind"></div>
+
+<br>
 <h3>Decoded METAR Stream</h3>
 <pre id="decoded"></pre>
 
@@ -172,6 +176,8 @@ console.error(err);
 }
 
 }
+
+const json3 = await r3.json();
 
 // ------------Marker size lookup table--------------
 function getMarkerSizes(hours){
@@ -341,6 +347,41 @@ data.forEach(m => {
 
 });
 
+let windSpeed_STD = {x:[], y:[], mode:"markers", name:"Wind Speed STD",
+  marker:{size:sizes.big, color:"black", symbol:"circle"}};
+
+let windSpeed_HF = {x:[], y:[], mode:"markers", name:"Wind Speed HF",
+  marker:{size:sizes.small, color:"black", symbol:"circle-open"}};
+
+let windDir_STD = {x:[], y:[], mode:"markers", name:"Wind Dir STD", yaxis:"y2",
+  marker:{size:sizes.big, color:"blue", symbol:"triangle-up"}};
+
+let windDir_HF = {x:[], y:[], mode:"markers", name:"Wind Dir HF", yaxis:"y2",
+  marker:{size:sizes.small, color:"blue", symbol:"triangle-open"}};
+
+json3.data.forEach(m => {
+
+  const t = new Date(m.time * 1000);
+  const isHF = (m.source === "HF");
+
+  if (m.wind_speed !== null && m.wind_speed !== undefined) {
+
+    if (isHF) {
+      windSpeed_HF.x.push(t);
+      windSpeed_HF.y.push(m.wind_speed);
+
+      windDir_HF.x.push(t);
+      windDir_HF.y.push(m.wind_dir);
+    } else {
+      windSpeed_STD.x.push(t);
+      windSpeed_STD.y.push(m.wind_speed);
+
+      windDir_STD.x.push(t);
+      windDir_STD.y.push(m.wind_dir);
+    }
+  }
+});
+
 // enforce minimum 3000 ft
 let yMax = Math.max(maxHeight, 3000);
 
@@ -402,6 +443,38 @@ Plotly.newPlot("plotSynopticFull", plotTracesFull, {
 }, {displaylogo:false});
 
 }
+
+
+//----------------- Wind Plot-----------------
+document.getElementById("titleWind").innerText =
+  `${icao} Wind Speed & Direction`;
+
+Plotly.newPlot("plotWind",
+  [windSpeed_STD, windSpeed_HF, windDir_STD, windDir_HF],
+  {
+    margin:{l:50,r:50,t:20,b:40},
+
+    xaxis:{
+      title:"Time"
+    },
+
+    yaxis:{
+      title:"Wind Speed (kt)",
+      rangemode:"tozero"
+    },
+
+    yaxis2:{
+      title:"Wind Direction (deg)",
+      overlaying:"y",
+      side:"right",
+      range:[0,360]
+    },
+
+    legend:{orientation:"h"}
+  },
+  {displaylogo:false}
+);
+
 
 // ---------------- INIT ----------------
 
