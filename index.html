@@ -348,27 +348,23 @@ data.forEach(m => {
 });
 
 let windSpeed_STD = {x:[], y:[], mode:"markers", name:"Wind Speed STD",
-  marker:{size:sizes.big, color:"black", symbol:"circle"}};
-cliponaxis:false
+  marker:{size:sizes.big, color:"black", symbol:"circle"},cliponaxis:false};
 
 let windSpeed_HF = {x:[], y:[], mode:"markers", name:"Wind Speed HF",
-  marker:{size:sizes.small, color:"black", symbol:"circle-open"}};
-cliponaxis:false
+  marker:{size:sizes.small, color:"black", symbol:"circle-open"},cliponaxis:false};
 
 let windDir_STD = {x:[], y:[], mode:"markers", name:"Wind Dir STD", yaxis:"y2",
-  marker:{size:sizes.big, color:"blue", symbol:"circle"}};
-cliponaxis:false
+  marker:{size:sizes.big, color:"blue", symbol:"circle"},cliponaxis:false};
 
 let windDir_HF = {x:[], y:[], mode:"markers", name:"Wind Dir HF", yaxis:"y2",
-  marker:{size:sizes.small, color:"blue", symbol:"circle-open"}};
-cliponaxis:false
+  marker:{size:sizes.small, color:"blue", symbol:"circle-open"},cliponaxis:false};
 
 data.forEach(m => {
 
   const t = new Date(m.time * 1000);
   const isHF = (m.source === "HF");
 
-  if (m.wind_speed !== null && m.wind_speed !== undefined) {
+  if (m.wind_speed !== null && m.wind_speed !== undefined && m.wind_dir !== null && m.wind_dir !== undefined) {
 
     if (isHF) {
       windSpeed_HF.x.push(t);
