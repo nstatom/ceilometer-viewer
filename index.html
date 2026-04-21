@@ -481,6 +481,7 @@ for (let m of data) {
 const minY = Math.min(...allVals);
 const maxY = Math.max(...allVals);
 const pad = (maxY - minY) * 0.1 || 1;
+const yRange = [yMin - pad, yMax + pad];
 
 // THIS is the key trick:
 const boundsTrace = {
