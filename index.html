@@ -438,10 +438,10 @@ let Temp_STD = {x:[], y:[], mode:"markers", type:"scattergl", name:"Temperature 
 let Temp_HF = {x:[], y:[], mode:"markers", type:"scattergl", name:"Temperature HF",
   marker:{size:sizes.small, color:"red", symbol:"circle-open"},cliponaxis:false};
 
-let Dewp_STD = {x:[], y:[], mode:"markers", type:"scattergl", name:"Dewpoint STD", yaxis:"y2",
+let Dewp_STD = {x:[], y:[], mode:"markers", type:"scattergl", name:"Dewpoint STD",
   marker:{size:sizes.big, color:"blue", symbol:"circle"},cliponaxis:false};
 
-let Dewp_HF = {x:[], y:[], mode:"markers", type:"scattergl", name:"Dewpoint HF", yaxis:"y2",
+let Dewp_HF = {x:[], y:[], mode:"markers", type:"scattergl", name:"Dewpoint HF",
   marker:{size:sizes.small, color:"blue", symbol:"circle-open"},cliponaxis:false};
 
 data.forEach(m => {
@@ -478,20 +478,20 @@ for (let m of data) {
   if (m.dewpoint !== null && m.dewpoint !== undefined) allVals.push(m.dewpoint);
 }
 
-const minY = Math.min(...allVals);
-const maxY = Math.max(...allVals);
-const pad = (maxY - minY) * 0.1 || 1;
-const yRange = [yMin - pad, yMax + pad];
+//const minY = Math.min(...allVals);
+//const maxY = Math.max(...allVals);
+//const pad = (maxY - minY) * 0.1 || 1;
+//const yRange = [yMin - pad, yMax + pad];
 
-// THIS is the key trick:
-const boundsTrace = {
-  x: [null, null],
-  y: [minY - pad, maxY + pad],
-  mode: "lines",
-  line: {opacity: 0},
-  hoverinfo: "skip",
-  showlegend: false
-};
+//// THIS is the key trick:
+//const boundsTrace = {
+//  x: [null, null],
+//  y: [minY - pad, maxY + pad],
+//  mode: "lines",
+//  line: {opacity: 0},
+//  hoverinfo: "skip",
+//  showlegend: false
+//};
 
 Plotly.newPlot("plotTemp",
   [Temp_STD, Temp_HF, Dewp_STD, Dewp_HF],
@@ -504,8 +504,8 @@ Plotly.newPlot("plotTemp",
 
     yaxis:{
       title:"Temperature & Dewpoint (°F)",
-      range: yRange,
-      autorange: false
+      //range: yRange,
+      autorange: true
     },
 
     legend:{orientation:"h"}
