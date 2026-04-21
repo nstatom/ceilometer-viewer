@@ -470,6 +470,28 @@ data.forEach(m => {
   }
 });
 
+let allTemps = [];
+let allDewps = [];
+
+data.forEach(m => {
+  if (m.temp !== null && m.temp !== undefined) {
+    allTemps.push(m.temp);
+  }
+  if (m.dewpoint !== null && m.dewpoint !== undefined) {
+    allDewps.push(m.dewpoint);
+  }
+});
+
+const allVals = allTemps.concat(allDewps);
+
+const yMin = Math.min(...allVals);
+const yMax = Math.max(...allVals);
+
+// add padding so it doesn't feel cramped
+const pad = (yMax - yMin) * 0.1 || 1;
+
+const yRange = [yMin - pad, yMax + pad];
+
 Plotly.newPlot("plotTemp",
   [Temp_STD, Temp_HF, Dewp_STD, Dewp_HF],
   {
@@ -480,8 +502,9 @@ Plotly.newPlot("plotTemp",
     },
 
     yaxis:{
-      title:"Air Temperature (F)",
-      autorange:true
+      title:"Temperature & Dewpoint (°F)",
+      range: yRange,
+      autorange: false
     },
 
     legend:{orientation:"h"}
