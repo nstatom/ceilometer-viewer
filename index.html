@@ -433,10 +433,10 @@ document.getElementById("titleTemp").innerText =
   `${icao} ${hours} hr Temperature & Dewpoint`;
 
 let Temp_STD = {x:[], y:[], mode:"markers", type:"scattergl", name:"Temperature STD",
-  marker:{size:sizes.big, color:"black", symbol:"circle"},cliponaxis:false};
+  marker:{size:sizes.big, color:"red", symbol:"circle"},cliponaxis:false};
 
 let Temp_HF = {x:[], y:[], mode:"markers", type:"scattergl", name:"Temperature HF",
-  marker:{size:sizes.small, color:"black", symbol:"circle-open"},cliponaxis:false};
+  marker:{size:sizes.small, color:"red", symbol:"circle-open"},cliponaxis:false};
 
 let Dewp_STD = {x:[], y:[], mode:"markers", type:"scattergl", name:"Dewpoint STD", yaxis:"y2",
   marker:{size:sizes.big, color:"blue", symbol:"circle"},cliponaxis:false};
